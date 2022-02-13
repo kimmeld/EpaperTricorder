@@ -1,3 +1,8 @@
+/*
+    Audio FFT Sensor
+
+
+*/
 #ifndef AUDIOFFT_H
 #define AUDIOFFT_H
 

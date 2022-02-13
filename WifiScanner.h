@@ -1,3 +1,8 @@
+/*
+    Wifi Scanner sensor
+
+
+*/
 #ifndef WIFISCANNER_H
 #define WIFISCANNER_H
 

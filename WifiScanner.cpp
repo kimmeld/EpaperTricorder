@@ -1,4 +1,8 @@
+/*
+    Wifi Scanner sensor
 
+
+*/
 #include "WifiScanner.h"
 
 WifiScanner::WifiScanner() {
@@ -6,7 +10,7 @@ WifiScanner::WifiScanner() {
   Count = -1;
 
   sem = xSemaphoreCreateMutex();
-  
+
   xTaskCreate(
     WifiScanner::WifiScannerTask,
     "WifiScanner",

@@ -1,3 +1,8 @@
+/*
+    Buttons thread/class
+
+
+*/
 #include "buttons.h"
 
 Buttons::Buttons() {

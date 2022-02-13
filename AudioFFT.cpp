@@ -1,4 +1,8 @@
+/*
+    Audio FFT Sensor
 
+
+*/
 #include "AudioFFT.h"
 
 #include "arduinoFFT.h" // Standard Arduino FFT library https://github.com/kosme/arduinoFFT
@@ -78,7 +82,7 @@ void AudioFFT::FFTTask(void * param) {
 
     // Store results for UI thread
     // NOTE:  if we can't take the semaphore right away because the UI thread has it we just
-    //        continue on and do another FFT reading.
+    //        continue on and do another sample/FFT.
     if (fft->TryLock()) {
       for (int i = 2; i < samples_read / 2; i++)
       {

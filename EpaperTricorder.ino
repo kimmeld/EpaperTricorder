@@ -33,6 +33,7 @@ void setup()
   ClearDisplay();
   display.hibernate();
 
+  // Creat the various tasks we require
   btns = new Buttons();
   wifi = new WifiScanner();
   audioFFT = new AudioFFT();
@@ -41,10 +42,12 @@ void setup()
 
 
 
-int uiMode = 0;
-bool uiFirst = true;
+// UI Loop
+int uiMode = 0;         // which screen are we on
+bool uiFirst = true;    // Is this the first time through this screen's loop?
 void loop()
 {
+  // Go to the next screen
   if (btns->btn1SingleClick) {
     uiMode++;
     if (uiMode > 1) uiMode = 0;
@@ -52,8 +55,10 @@ void loop()
     uiFirst = true;
   }
 
+  // We've read the buttons
   btns->Reset();
 
+  // Dispatch to the appropriate UI loop
   switch (uiMode) {
     case 0:
       loop_wifi(uiFirst);
@@ -67,25 +72,20 @@ void loop()
   uiFirst = false;
 }
 
-int16_t tbx, tby; uint16_t tbw, tbh;
+int16_t tbx, tby; uint16_t tbw, tbh;  // text metrics
 void ClearDisplay() {
-  //display.setFullWindow();
-  //display.clearScreen();
   display.fillRect(0, 0, display.width(), display.height(), GxEPD_WHITE);
   display.display(false);
-  //display.reset();
 
-  //  display.setFont(&FreeSans9pt7b);
   display.setFont(NULL);
   display.setTextColor(GxEPD_BLACK);
-  //display.getTextBounds("M", 0, 0, &tbx, &tby, &tbw, &tbh);
   tbh = 7;
 }
 
+// UI Code for Wifi Scanner
 void loop_wifi(bool first) {
   if (first) {
-    //ClearDisplay();
-
+    // Draw header
     display.setCursor(0, 0);
     display.print("Wifi Scanner");
     display.drawLine(0, tbh + 2, display.width(), tbh + 2, GxEPD_BLACK);
@@ -93,15 +93,16 @@ void loop_wifi(bool first) {
   }
 
   int y = tbh + 4;
-
   if (wifi->TryLock()) {
     if (wifi->NewData) {
       wifi->NewData = false;
+      // Display number of networks
       display.fillRect(150, 0, display.width() - 150, tbh, GxEPD_WHITE);
       display.setCursor(150, 0);
       display.print(wifi->Count);
       display.print(" networks");
 
+      // Display the list of networks
       display.fillRect(0, y, display.width(), display.height() - tbh, GxEPD_WHITE);
       for (int i = 0; i < wifi->Count; i++) {
         display.setCursor(0, y);
@@ -110,6 +111,7 @@ void loop_wifi(bool first) {
         display.print(WiFi.RSSI(i));
         y += tbh + 2;
       }
+      // Update the display
       display.display(true);
       display.hibernate();
     }
@@ -119,17 +121,16 @@ void loop_wifi(bool first) {
 
 void loop_fft(bool first) {
   if (first) {
-    //ClearDisplay();
-
+    // Draw header
     display.setCursor(0, 0);
     display.print("FFT");
     display.drawLine(0, tbh + 2, display.width(), tbh + 2, GxEPD_BLACK);
     display.display(true);
-
   }
 
   if (audioFFT->TryLock()) {
     if (audioFFT->NewData) {
+      // Display FFT results
       double fftMax = (double)(display.height() - (tbh + 4));
       display.fillRect(0, tbh + 4, display.width(), fftMax, GxEPD_WHITE);
       for (int i = 0; i < SAMPLE_BUFFER_SIZE / 2; i++) {
