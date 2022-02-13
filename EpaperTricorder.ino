@@ -1,6 +1,7 @@
 #include "buttons.h"
 #include "WifiScanner.h"
 #include "AudioFFT.h"
+#include "BLEScanner.h"
 
 #include <GxEPD2_GFX.h>
 #include <GxEPD2_7C.h>
@@ -16,6 +17,9 @@ Buttons *btns;
 
 // Wifi Scanner
 WifiScanner *wifi;
+
+// BLE Scanner
+// BLEScanner *ble;
 
 // FFT
 AudioFFT *audioFFT;
@@ -37,6 +41,7 @@ void setup()
   btns = new Buttons();
   wifi = new WifiScanner();
   audioFFT = new AudioFFT();
+  //ble = new BLEScanner();
 
 }
 
@@ -50,7 +55,7 @@ void loop()
   // Go to the next screen
   if (btns->btn1SingleClick) {
     uiMode++;
-    if (uiMode > 1) uiMode = 0;
+    if (uiMode > 2) uiMode = 0;
     ClearDisplay();
     uiFirst = true;
   }
@@ -65,6 +70,9 @@ void loop()
       break;
     case 1:
       loop_fft(uiFirst);
+      break;
+    case 2:
+      loop_ble(uiFirst);
       break;
     default:
       break;
@@ -143,4 +151,46 @@ void loop_fft(bool first) {
     }
     audioFFT->Unlock();
   }
+}
+
+
+void loop_ble(bool first) {
+  if (first) {
+    // Draw header
+    display.setCursor(0, 0);
+    display.print("BLE Scanner");
+    display.drawLine(0, tbh + 2, display.width(), tbh + 2, GxEPD_BLACK);
+    display.display(true);
+  }
+  int y = tbh + 4;
+
+  display.setCursor(0, y);
+  display.print("Not implemented");
+  display.display(true);
+
+  /*if (ble->TryLock()) {
+    if (ble->NewData) {
+      display.fillRect(150, 0, display.width() - 150, tbh, GxEPD_WHITE);
+      display.setCursor(150, 0);
+      display.print(ble->Count);
+      display.print(" devices");
+
+      // Display the list of networks
+      display.fillRect(0, y, display.width(), display.height() - tbh, GxEPD_WHITE);
+      for (int i = 0; i < ble->Count; i++) {
+        BLEAdvertisedDevice d = ble->FoundDevices->getDevice(i);
+
+        display.setCursor(0, y);
+        display.print(d.getName().c_str());
+        y += tbh + 2;
+      }
+      // Update the display
+      display.display(true);
+      display.hibernate();
+
+      ble->NewData = false;
+    }
+    ble->Unlock();
+    }
+  */
 }
