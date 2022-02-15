@@ -6,6 +6,9 @@
 #ifndef BLESCANNER_H
 #define BLESCANNER_H
 
+#include <Arduino.h>
+#include <vector>
+#include <sstream>
 #include <BLEDevice.h>
 #include <BLEUtils.h>
 #include <BLEScan.h>
@@ -16,9 +19,11 @@ class BLEScanner
   public:
     BLEScanner();
 
+    bool Enable;
+
     bool NewData;
     int Count;
-    BLEScanResults FoundDevices;
+    std::vector<String> FoundDevices;
 
     bool TryLock();
     void Unlock();

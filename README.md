@@ -8,13 +8,17 @@ This is built based on a LilyGo T5-V2.8 - [AliExpress](https://www.aliexpress.co
 
 Currently this supports:
 
-## Audio Level
+## FFT Audio Levels
 
 This E-Paper board includes a ICS43434 I2S microphone.  The Audio Level sensor samples the microphone, feeds it into ArduinoFFT, and displays the results.
 
 ## 2.4GHz Wifi Networks
 
 This sensor scans for new Wifi networks every five seconds and displays the ones it found and their signal strength.
+
+## BLE Devices
+
+This sensor scans for BLE devices and displays what it found.
 
 # General Program Design
 

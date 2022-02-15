@@ -19,10 +19,14 @@ Buttons *btns;
 WifiScanner *wifi;
 
 // BLE Scanner
-// BLEScanner *ble;
+BLEScanner *ble;
 
 // FFT
 AudioFFT *audioFFT;
+
+// UI Globals
+int uiMode = 0;         // which screen are we on
+bool uiFirst = true;    // Is this the first time through this screen's loop?
 
 void setup()
 {
@@ -41,15 +45,15 @@ void setup()
   btns = new Buttons();
   wifi = new WifiScanner();
   audioFFT = new AudioFFT();
-  //ble = new BLEScanner();
+  ble = new BLEScanner();
 
+  uiMode = 0;
+  uiFirst = true;
 }
 
 
 
 // UI Loop
-int uiMode = 0;         // which screen are we on
-bool uiFirst = true;    // Is this the first time through this screen's loop?
 void loop()
 {
   // Go to the next screen
@@ -58,6 +62,9 @@ void loop()
     if (uiMode > 2) uiMode = 0;
     ClearDisplay();
     uiFirst = true;
+
+    wifi->Enable = false;
+    ble->Enable = false;
   }
 
   // We've read the buttons
@@ -66,12 +73,14 @@ void loop()
   // Dispatch to the appropriate UI loop
   switch (uiMode) {
     case 0:
+      wifi->Enable = true;
       loop_wifi(uiFirst);
       break;
     case 1:
       loop_fft(uiFirst);
       break;
     case 2:
+      ble->Enable = true;
       loop_ble(uiFirst);
       break;
     default:
@@ -164,24 +173,22 @@ void loop_ble(bool first) {
   }
   int y = tbh + 4;
 
-  display.setCursor(0, y);
-  display.print("Not implemented");
-  display.display(true);
+  //  display.setCursor(0, y);
+  //  display.print("Not implemented");
+  //  display.display(true);
 
-  /*if (ble->TryLock()) {
+  if (ble->TryLock()) {
     if (ble->NewData) {
       display.fillRect(150, 0, display.width() - 150, tbh, GxEPD_WHITE);
       display.setCursor(150, 0);
-      display.print(ble->Count);
+      display.print(ble->FoundDevices.size());
       display.print(" devices");
 
       // Display the list of networks
       display.fillRect(0, y, display.width(), display.height() - tbh, GxEPD_WHITE);
-      for (int i = 0; i < ble->Count; i++) {
-        BLEAdvertisedDevice d = ble->FoundDevices->getDevice(i);
-
+      for (int i = 0; i < ble->FoundDevices.size(); i++) {
         display.setCursor(0, y);
-        display.print(d.getName().c_str());
+        display.print(ble->FoundDevices[i]);
         y += tbh + 2;
       }
       // Update the display
@@ -191,6 +198,6 @@ void loop_ble(bool first) {
       ble->NewData = false;
     }
     ble->Unlock();
-    }
-  */
+  }
+
 }
