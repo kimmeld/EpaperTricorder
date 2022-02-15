@@ -8,6 +8,7 @@
 WifiScanner::WifiScanner() {
   NewData = false;
   Count = -1;
+  Enable = false;
 
   sem = xSemaphoreCreateMutex();
 
@@ -36,9 +37,11 @@ void WifiScanner::WifiScannerTask(void * parameter)
   {
     // WiFi.scanNetworks will return the number of networks found
     if (xSemaphoreTake(scan->sem, portMAX_DELAY)) {
-      int n = WiFi.scanNetworks();
-      scan->Count = n;
-      scan->NewData = true;
+      if (scan->Enable) {
+        int n = WiFi.scanNetworks();
+        scan->Count = n;
+        scan->NewData = true;
+      }
       xSemaphoreGive(scan->sem);
     }
     // Wait a bit before scanning again

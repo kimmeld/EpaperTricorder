@@ -13,6 +13,8 @@ class WifiScanner
   public:
     WifiScanner();
 
+    bool Enable;
+
     bool NewData;
     int Count;
 
