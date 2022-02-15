@@ -51,23 +51,23 @@ void BLEScanner::BLEScannerTask(void * parameter)
       }
   };
 
-
+  BLEDevice::init("");
   for (;;)
   {
     if (xSemaphoreTake(scan->sem, portMAX_DELAY)) {
       if (scan->Enable) {
-        BLEDevice::init("");
+
         BLEScan *pBLEScan = BLEDevice::getScan(); //create new scan
         pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks(scan));
-        pBLEScan->setActiveScan(true); //active scan uses more power, but get results faster
-        pBLEScan->setInterval(0x50);
-        pBLEScan->setWindow(0x30);
+        pBLEScan->setActiveScan(false); // Passive scan doesn't seem to interfere with the Wifi scanner
+//        pBLEScan->setInterval(0x50);
+//        pBLEScan->setWindow(0x30);
 
         // Scan for five seconds then stop
         scan->FoundDevices.clear();
         pBLEScan->start(5);
         pBLEScan->stop();
-        BLEDevice::deinit(false);
+        //BLEDevice::deinit(true);
 
         scan->NewData = true;
       }
