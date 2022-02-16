@@ -6,11 +6,12 @@
 #include "buttons.h"
 
 Buttons::Buttons() {
-
   btn1 = new PinButton(37);
   btn2 = new PinButton(38);
   btn3 = new PinButton(39);
-  
+
+  btn1SingleClick = false;
+
   xTaskCreate(
     Buttons::ButtonsTask,
     "Buttons",
@@ -28,7 +29,7 @@ void Buttons::Reset() {
 
 void Buttons::ButtonsTask(void * param) {
   Buttons *btns = (Buttons*)param;
-  
+
   for (;;) {
     btns->btn1->update();
     btns->btn2->update();
