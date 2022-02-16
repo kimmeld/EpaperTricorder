@@ -150,7 +150,7 @@ void loop_fft(bool first) {
       // Display FFT results
       double fftMax = (double)(display.height() - (tbh + 4));
       display.fillRect(0, tbh + 4, display.width(), fftMax, GxEPD_WHITE);
-      for (int i = 0; i < SAMPLE_BUFFER_SIZE / 2; i++) {
+      for (int i = 2; i < SAMPLE_BUFFER_SIZE / 2; i++) {
         int s = min(audioFFT->FFTResults[i], fftMax);
         display.drawLine(i, display.height() - s, i, display.height(), GxEPD_BLACK);
       }

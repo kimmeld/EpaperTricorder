@@ -5,6 +5,9 @@
 */
 #include "AudioFFT.h"
 
+// Adapted from
+// https://github.com/G6EJD/ESP32-8-Octave-Audio-Spectrum-Display/blob/master/ESP32_Spectrum_Display_03.ino
+
 #include "arduinoFFT.h" // Standard Arduino FFT library https://github.com/kosme/arduinoFFT
 arduinoFFT FFT = arduinoFFT();
 
@@ -37,48 +40,34 @@ AudioFFT::AudioFFT() {
   i2s_driver_install(I2S_NUM_0, &i2s_config, 0, NULL);
   i2s_set_pin(I2S_NUM_0, &i2s_mic_pins);
 
-  sem = xSemaphoreCreateMutex();
-
   xTaskCreate(
     AudioFFT::FFTTask,
     "FFT",
-    16384,
+    1024,
     (void *)this,
     1,
-    &fftTask
+    &SensorTask
   );
-}
-
-
-bool AudioFFT::TryLock() {
-  return xSemaphoreTake(sem, 1);
-}
-
-void AudioFFT::Unlock() {
-  xSemaphoreGive(sem);
 }
 
 
 void AudioFFT::FFTTask(void * param) {
   AudioFFT *fft = (AudioFFT *)param;
-  double vReal[SAMPLE_BUFFER_SIZE];
-  double vImag[SAMPLE_BUFFER_SIZE];
-  int32_t raw_samples[SAMPLE_BUFFER_SIZE];
 
   for (;;) {
     // Read samples
     size_t bytes_read = 0;
-    i2s_read(I2S_NUM_0, raw_samples, sizeof(int32_t) * SAMPLE_BUFFER_SIZE, &bytes_read, portMAX_DELAY);
+    i2s_read(I2S_NUM_0, fft->raw_samples, sizeof(int32_t) * SAMPLE_BUFFER_SIZE, &bytes_read, portMAX_DELAY);
     int samples_read = bytes_read / sizeof(int32_t);
     for (int i = 0; i < samples_read; i++) {
-      vReal[i] = (float)raw_samples[i];
-      vImag[i] = 0;
+      fft->vReal[i] = (float)fft->raw_samples[i] / 2147483647.0 * 2000.0;
+      fft->vImag[i] = 0;
     }
 
     // FFT
-    FFT.Windowing(vReal, samples_read, FFT_WIN_TYP_HAMMING, FFT_FORWARD);
-    FFT.Compute(vReal, vImag, samples_read, FFT_FORWARD);
-    FFT.ComplexToMagnitude(vReal, vImag, samples_read);
+    FFT.Windowing(fft->vReal, samples_read, FFT_WIN_TYP_HAMMING, FFT_FORWARD);
+    FFT.Compute(fft->vReal, fft->vImag, samples_read, FFT_FORWARD);
+    FFT.ComplexToMagnitude(fft->vReal, fft->vImag, samples_read);
 
     // Store results for UI thread
     // NOTE:  if we can't take the semaphore right away because the UI thread has it we just
@@ -86,7 +75,7 @@ void AudioFFT::FFTTask(void * param) {
     if (fft->TryLock()) {
       for (int i = 2; i < samples_read / 2; i++)
       {
-        fft->FFTResults[i] = round(vReal[i] / 2147483647.0 * 10000);
+        fft->FFTResults[i] = fft->vReal[i];
       }
       fft->NewData = true;
       fft->Unlock();
