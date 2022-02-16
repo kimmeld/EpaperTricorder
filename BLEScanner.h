@@ -14,25 +14,17 @@
 #include <BLEScan.h>
 #include <BLEAdvertisedDevice.h>
 
-class BLEScanner
+#include "SensorBase.h"
+
+class BLEScanner : public SensorBase
 {
   public:
     BLEScanner();
 
-    bool Enable;
-
-    bool NewData;
     int Count;
     std::vector<String> FoundDevices;
 
-    bool TryLock();
-    void Unlock();
-
     static void BLEScannerTask(void * param);
-  protected:
-    SemaphoreHandle_t sem;
-  private:
-    TaskHandle_t scannerTask;
 };
 
 

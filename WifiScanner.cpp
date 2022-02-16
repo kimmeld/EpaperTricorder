@@ -6,11 +6,7 @@
 #include "WifiScanner.h"
 
 WifiScanner::WifiScanner() {
-  NewData = false;
   Count = -1;
-  Enable = false;
-
-  sem = xSemaphoreCreateMutex();
 
   xTaskCreate(
     WifiScanner::WifiScannerTask,
@@ -18,16 +14,8 @@ WifiScanner::WifiScanner() {
     1000,
     (void *)this,
     1,
-    &scannerTask
+    &SensorTask
   );
-}
-
-bool WifiScanner::TryLock() {
-  return xSemaphoreTake(sem, 1);
-}
-
-void WifiScanner::Unlock() {
-  xSemaphoreGive(sem);
 }
 
 void WifiScanner::WifiScannerTask(void * parameter)
@@ -36,13 +24,13 @@ void WifiScanner::WifiScannerTask(void * parameter)
   for (;;)
   {
     // WiFi.scanNetworks will return the number of networks found
-    if (xSemaphoreTake(scan->sem, portMAX_DELAY)) {
+    if (scan->Lock()) {
       if (scan->Enable) {
         int n = WiFi.scanNetworks();
         scan->Count = n;
         scan->NewData = true;
       }
-      xSemaphoreGive(scan->sem);
+      scan->Unlock();
     }
     // Wait a bit before scanning again
     vTaskDelay(5000 / portTICK_PERIOD_MS);

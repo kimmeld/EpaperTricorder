@@ -6,10 +6,7 @@
 #include "BLEScanner.h"
 
 BLEScanner::BLEScanner() {
-  NewData = false;
-  Enable = false;
   Count = -1;
-  sem = xSemaphoreCreateMutex();
 
   Serial.printf("BLE Scanner Task constructor\n");
 
@@ -19,17 +16,10 @@ BLEScanner::BLEScanner() {
     16384,
     (void *)this,
     1,
-    &scannerTask
+    &SensorTask
   );
 }
 
-bool BLEScanner::TryLock() {
-  return xSemaphoreTake(sem, 1);
-}
-
-void BLEScanner::Unlock() {
-  xSemaphoreGive(sem);
-}
 
 void BLEScanner::BLEScannerTask(void * parameter)
 {
@@ -54,7 +44,7 @@ void BLEScanner::BLEScannerTask(void * parameter)
   BLEDevice::init("");
   for (;;)
   {
-    if (xSemaphoreTake(scan->sem, portMAX_DELAY)) {
+    if (scan->Lock()) {
       if (scan->Enable) {
 
         BLEScan *pBLEScan = BLEDevice::getScan(); //create new scan
