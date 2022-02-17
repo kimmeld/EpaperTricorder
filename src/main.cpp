@@ -121,14 +121,14 @@ void loop_ble(bool first) {
     if (ble->NewData) {
       display.fillRect(150, 0, display.width() - 150, tbh, GxEPD_WHITE);
       display.setCursor(150, 0);
-      display.print(ble->Count);
+      display.print(ble->FoundDevices.size());
       display.print(" devices");
 
       // Display the list of networks
       display.fillRect(0, y, display.width(), display.height() - tbh, GxEPD_WHITE);
-      for (int i = 0; i < ble->FoundDevices.size(); i++) {
+      for (auto s : ble->FoundDevices) {
         display.setCursor(0, y);
-        display.print(ble->FoundDevices[i]);
+        display.print(s);
         y += tbh + 2;
       }
       // Update the display

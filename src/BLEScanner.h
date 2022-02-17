@@ -7,7 +7,7 @@
 #define BLESCANNER_H
 
 #include <Arduino.h>
-#include <vector>
+#include <set>
 #include <sstream>
 #include <BLEDevice.h>
 #include <BLEUtils.h>
@@ -22,7 +22,7 @@ class BLEScanner : public SensorBase
     BLEScanner();
 
     int Count;
-    std::vector<String> FoundDevices;
+    std::set<String> FoundDevices;
 
     static void BLEScannerTask(void * param);
 };

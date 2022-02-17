@@ -10,7 +10,7 @@ BLEScanner::BLEScanner() {
 
   Count = -1;
 
-  Serial.printf("BLE Scanner Task constructor\n");
+  //Serial.printf("BLE Scanner Task constructor\n");
 
   xTaskCreate(
     BLEScanner::BLEScannerTask,
@@ -34,22 +34,22 @@ void BLEScanner::BLEScannerTask(void * parameter)
         scan = _scan;
       }
       void onResult(BLEAdvertisedDevice advertisedDevice) {
-        Serial.printf("Advertised Device: %s \n", advertisedDevice.toString().c_str());
-        if (scan->FoundDevices.size() < 20) {
+        //Serial.printf("Advertised Device: %s \n", advertisedDevice.toString().c_str());
+        //if (scan->FoundDevices.size() < 20) {
           std::stringstream ss;
           ss << advertisedDevice.getAddress().toString() << ": " << advertisedDevice.getName() << " " << (int)advertisedDevice.getTXPower();
-          scan->FoundDevices.push_back(ss.str().c_str());
-        }
+          scan->FoundDevices.insert(ss.str().c_str());
+        //}
         scan->Count++;
       }
   };
   
   for (;;)
   {
-    Serial.println("BLE Scan loop start...");
+    //Serial.println("BLE Scan loop start...");
     if (scan->Lock()) {
       if (scan->Enable) {
-        Serial.println("BLE Scanning...");
+        //Serial.println("BLE Scanning...");
         BLEScan *pBLEScan = BLEDevice::getScan(); //create new scan
         pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks(scan));
         pBLEScan->setActiveScan(false); // Passive scan doesn't seem to interfere with the Wifi scanner
