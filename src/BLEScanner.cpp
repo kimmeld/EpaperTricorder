@@ -37,7 +37,7 @@ void BLEScanner::BLEScannerTask(void * parameter)
         //Serial.printf("Advertised Device: %s \n", advertisedDevice.toString().c_str());
         //if (scan->FoundDevices.size() < 20) {
           std::stringstream ss;
-          ss << advertisedDevice.getAddress().toString() << ": " << advertisedDevice.getName() << " " << (int)advertisedDevice.getTXPower();
+          ss << advertisedDevice.getAddress().toString() << "-" << (int)advertisedDevice.getTXPower();
           scan->FoundDevices.insert(ss.str().c_str());
         //}
         scan->Count++;

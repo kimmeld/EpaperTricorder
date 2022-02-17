@@ -112,7 +112,7 @@ void loop_ble(bool first) {
     display.display(true);
   }
   int y = tbh + 4;
-
+  int x = 0;
   //  display.setCursor(0, y);
   //  display.print("Not implemented");
   //  display.display(true);
@@ -127,9 +127,13 @@ void loop_ble(bool first) {
       // Display the list of networks
       display.fillRect(0, y, display.width(), display.height() - tbh, GxEPD_WHITE);
       for (auto s : ble->FoundDevices) {
-        display.setCursor(0, y);
+        display.setCursor(x, y);
         display.print(s);
         y += tbh + 2;
+        if (y > (display.height() - tbh)) {
+          y = tbh + 4;
+          x += display.width()/2;
+        }
       }
       // Update the display
       display.display(true);
