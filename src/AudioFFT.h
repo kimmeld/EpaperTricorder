@@ -6,8 +6,8 @@
 #ifndef AUDIOFFT_H
 #define AUDIOFFT_H
 
-#include "RTOS.h"
-#include "driver/i2s.h"
+#include <FreeRTOS.h>
+#include <driver/i2s.h>
 #include "SensorBase.h"
 
 // Adapted from

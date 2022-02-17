@@ -11,7 +11,7 @@ WifiScanner::WifiScanner() {
   xTaskCreate(
     WifiScanner::WifiScannerTask,
     "WifiScanner",
-    1000,
+    2048,
     (void *)this,
     1,
     &SensorTask

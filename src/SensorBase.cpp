@@ -3,7 +3,7 @@
  */
 
 #include "SensorBase.h"
-#include <RTOS.h>
+#include <FreeRTOS.h>
  
 SensorBase::SensorBase() {
   NewData = false;

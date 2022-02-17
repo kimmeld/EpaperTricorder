@@ -6,7 +6,7 @@
 #ifndef SENSORBASE_H
 #define SENSORBASE_H
 
-#include <RTOS.h>
+#include <FreeRTOS.h>
 
 class SensorBase
 {

@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include "buttons.h"
 #include "WifiScanner.h"
 #include "AudioFFT.h"
@@ -27,67 +28,6 @@ AudioFFT *audioFFT;
 // UI Globals
 int uiMode = 0;         // which screen are we on
 bool uiFirst = true;    // Is this the first time through this screen's loop?
-
-void setup()
-{
-  // Set WiFi to station mode and disconnect from an AP if it was previously connected
-  WiFi.mode(WIFI_STA);
-  WiFi.disconnect();
-
-  Serial.begin(115200);
-
-  display.init();
-  display.setRotation(1);
-  ClearDisplay();
-  display.hibernate();
-
-  // Creat the various tasks we require
-  btns = new Buttons();
-  wifi = new WifiScanner();
-  audioFFT = new AudioFFT();
-  ble = new BLEScanner();
-
-  uiMode = 0;
-  uiFirst = true;
-}
-
-
-
-// UI Loop
-void loop()
-{
-  // Go to the next screen
-  if (btns->btn1SingleClick) {
-    uiMode++;
-    if (uiMode > 2) uiMode = 0;
-    ClearDisplay();
-    uiFirst = true;
-
-    wifi->Enable = false;
-    ble->Enable = false;
-  }
-
-  // We've read the buttons
-  btns->Reset();
-
-  // Dispatch to the appropriate UI loop
-  switch (uiMode) {
-    case 0:
-      wifi->Enable = true;
-      loop_wifi(uiFirst);
-      break;
-    case 1:
-      loop_fft(uiFirst);
-      break;
-    case 2:
-      ble->Enable = true;
-      loop_ble(uiFirst);
-      break;
-    default:
-      break;
-  }
-  uiFirst = false;
-}
 
 int16_t tbx, tby; uint16_t tbw, tbh;  // text metrics
 void ClearDisplay() {
@@ -181,7 +121,7 @@ void loop_ble(bool first) {
     if (ble->NewData) {
       display.fillRect(150, 0, display.width() - 150, tbh, GxEPD_WHITE);
       display.setCursor(150, 0);
-      display.print(ble->FoundDevices.size());
+      display.print(ble->Count);
       display.print(" devices");
 
       // Display the list of networks
@@ -200,4 +140,67 @@ void loop_ble(bool first) {
     ble->Unlock();
   }
 
+}
+
+
+
+void setup()
+{
+  // Set WiFi to station mode and disconnect from an AP if it was previously connected
+  WiFi.mode(WIFI_STA);
+  WiFi.disconnect();
+
+  Serial.begin(115200);
+
+  display.init();
+  display.setRotation(1);
+  ClearDisplay();
+  display.hibernate();
+
+  // Creat the various tasks we require
+  btns = new Buttons();
+  wifi = new WifiScanner();
+  audioFFT = new AudioFFT();
+  ble = new BLEScanner();
+
+  uiMode = 0;
+  uiFirst = true;
+}
+
+
+
+// UI Loop
+void loop()
+{
+  // Go to the next screen
+  if (btns->btn1SingleClick) {
+    uiMode++;
+    if (uiMode > 2) uiMode = 0;
+    ClearDisplay();
+    uiFirst = true;
+
+    wifi->Enable = false;
+    ble->Enable = false;
+  }
+
+  // We've read the buttons
+  btns->Reset();
+
+  // Dispatch to the appropriate UI loop
+  switch (uiMode) {
+    case 0:
+      wifi->Enable = true;
+      loop_wifi(uiFirst);
+      break;
+    case 1:
+      loop_fft(uiFirst);
+      break;
+    case 2:
+      ble->Enable = true;
+      loop_ble(uiFirst);
+      break;
+    default:
+      break;
+  }
+  uiFirst = false;
 }
