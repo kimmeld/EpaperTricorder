@@ -165,7 +165,7 @@ void setup()
   btns = new Buttons();
   wifi = new WifiScanner();
   audioFFT = new AudioFFT();
-  ble = new BLEScanner();
+  //ble = new BLEScanner();
 
   uiMode = 0;
   uiFirst = true;
@@ -179,12 +179,16 @@ void loop()
   // Go to the next screen
   if (btns->btn1SingleClick) {
     uiMode++;
-    if (uiMode > 2) uiMode = 0;
+    if (uiMode > 1) uiMode = 0;
     ClearDisplay();
     uiFirst = true;
 
     wifi->Enable = false;
-    ble->Enable = false;
+    //ble->Enable = false;
+  }
+
+  if (btns->btn2SingleClick) {
+    Serial.println(ESP.getFreeHeap());
   }
 
   // We've read the buttons
@@ -200,8 +204,8 @@ void loop()
       loop_fft(uiFirst);
       break;
     case 2:
-      ble->Enable = true;
-      loop_ble(uiFirst);
+      //ble->Enable = true;
+      //loop_ble(uiFirst);
       break;
     default:
       break;
