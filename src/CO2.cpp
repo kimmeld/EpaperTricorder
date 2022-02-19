@@ -7,7 +7,6 @@
 
 CO2Sensor::CO2Sensor()
 {
-    Wire.begin();
     sensor = new CCS811(0x5A);
     if (sensor->begin())
     {

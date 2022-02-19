@@ -178,7 +178,7 @@ void loop_co2(bool first) {
         s = min(s, dispMax);
         display.drawLine(i, display.height() - s, i, display.height(), GxEPD_BLACK);
       }
-      
+
       display.display(true);
       display.hibernate();
       co2Sensor->NewData = false;
@@ -192,6 +192,8 @@ void setup()
   // Set WiFi to station mode and disconnect from an AP if it was previously connected
   WiFi.mode(WIFI_STA);
   WiFi.disconnect();
+
+  Wire.begin();
 
   Serial.begin(115200);
 
