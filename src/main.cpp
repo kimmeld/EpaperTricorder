@@ -3,6 +3,7 @@
 #include "WifiScanner.h"
 #include "AudioFFT.h"
 #include "BLEScanner.h"
+#include "CO2.h"
 
 #include <GxEPD2_GFX.h>
 #include <GxEPD2_7C.h>
@@ -24,6 +25,9 @@ BLEScanner *ble;
 
 // FFT
 AudioFFT *audioFFT;
+
+// CO2
+CO2Sensor *co2Sensor;
 
 // UI Globals
 int uiMode = 0;         // which screen are we on
@@ -146,7 +150,42 @@ void loop_ble(bool first) {
 
 }
 
+const int co2_offset = 380;
+const int co2_scale = 10;
+void loop_co2(bool first) {
+  if (first) {
+    // Draw header
+    display.setCursor(0, 0);
+    display.print("eCO2");
+    display.drawLine(0, tbh + 2, display.width(), tbh + 2, GxEPD_BLACK);
+    display.drawLine(203, tbh + 2, 203, 200, GxEPD_BLACK);
 
+    display.display(true);
+  }
+  int dispMax = display.height() - (tbh + 4);
+  if (co2Sensor->TryLock()) {
+    if (co2Sensor->NewData) {
+      // Display CO2 results
+      display.fillRect(0, tbh + 4, 200, dispMax, GxEPD_WHITE);
+      display.fillRect(40, 0, 70, tbh, GxEPD_WHITE);
+      display.setCursor(40, 0);
+      display.print(co2Sensor->co2[199]);
+      display.print("ppm");
+      for (int i = 0; i < 200; i++) {
+        int s = co2Sensor->co2[i];
+        s -= co2_offset;
+        s /= co2_scale;
+        s = min(s, dispMax);
+        display.drawLine(i, display.height() - s, i, display.height(), GxEPD_BLACK);
+      }
+      
+      display.display(true);
+      display.hibernate();
+      co2Sensor->NewData = false;
+    }
+    co2Sensor->Unlock();
+  }
+}
 
 void setup()
 {
@@ -161,11 +200,14 @@ void setup()
   ClearDisplay();
   display.hibernate();
 
-  // Creat the various tasks we require
+
+
+  // Create the various tasks we require
   btns = new Buttons();
   wifi = new WifiScanner();
   audioFFT = new AudioFFT();
   //ble = new BLEScanner();
+  co2Sensor = new CO2Sensor();
 
   uiMode = 0;
   uiFirst = true;
@@ -179,7 +221,7 @@ void loop()
   // Go to the next screen
   if (btns->btn1SingleClick) {
     uiMode++;
-    if (uiMode > 1) uiMode = 0;
+    if (uiMode > 2) uiMode = 0;
     ClearDisplay();
     uiFirst = true;
 
@@ -204,8 +246,7 @@ void loop()
       loop_fft(uiFirst);
       break;
     case 2:
-      //ble->Enable = true;
-      //loop_ble(uiFirst);
+      loop_co2(uiFirst);
       break;
     default:
       break;
