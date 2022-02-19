@@ -90,6 +90,11 @@ void EnvironmentSensor::CO2SensorTask(void *parameter)
         Serial.print(sensor->bmp280->readPressure());
         Serial.println();
 
+        // Feed temperature into ccs811 to get a more accurate eCO2 reading
+        // NOTE:  The relative humidity is obviously faked since we don't have a
+        //        sensor for that.  I should have ordered a BME280, not a BMP280.
+        sensor->ccs811->setEnvironmentalData(20.0, sensor->temp[199]);
+
         // Wait a bit before scanning again
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
