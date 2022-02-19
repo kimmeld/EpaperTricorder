@@ -29,18 +29,48 @@ AudioFFT *audioFFT;
 // CO2
 CO2Sensor *co2Sensor;
 
+// Display Constants
+const int TextHeight = 7;
+const int HeaderBottom = TextHeight + 2;
+const int DataStart = HeaderBottom + 2;
+const int DataHeight = 176 - DataStart;
+
+/*
+ * Display Layout
+ * 
+ * Height = 176, Width = 264
+ * 
+ * |----------------------------------------|
+ * | Title area - y -> 0-HeaderBottom       |
+ * |----------------------------------------|
+ * | Data area  - y -> DataStart-DataHeight |
+ * |              x -> 0-264                |
+ * |                                        |
+ * ...                                    ...  
+ * |                                        |
+ * ------------------------------------------
+ * 
+ * Title area
+ * - Has the name of the sensor/display that's running
+ * - May also have additional data, like WiFi network count
+ * 
+ * Data area
+ * - Entirely up to the sensor/display that's running
+ * - Could be a list of stuff - e.g., WiFi networks
+ * - Could be a current-state graph - e.g., Audio spectrum
+ * - Could be a historical-state graph - e.g., temperature, CO2, etc
+ */ 
+
 // UI Globals
 int uiMode = 0;         // which screen are we on
 bool uiFirst = true;    // Is this the first time through this screen's loop?
 
-int16_t tbx, tby; uint16_t tbw, tbh;  // text metrics
 void ClearDisplay() {
   display.fillRect(0, 0, display.width(), display.height(), GxEPD_WHITE);
   display.display(false);
 
   display.setFont(NULL);
   display.setTextColor(GxEPD_BLACK);
-  tbh = 7;
 }
 
 // UI Code for Wifi Scanner
@@ -49,28 +79,28 @@ void loop_wifi(bool first) {
     // Draw header
     display.setCursor(0, 0);
     display.print("Wifi Scanner");
-    display.drawLine(0, tbh + 2, display.width(), tbh + 2, GxEPD_BLACK);
+    display.drawLine(0, HeaderBottom, display.width(), HeaderBottom, GxEPD_BLACK);
     display.display(true);
   }
 
-  int y = tbh + 4;
+  int y = TextHeight + 4;
   if (wifi->TryLock()) {
     if (wifi->NewData) {
       wifi->NewData = false;
       // Display number of networks
-      display.fillRect(150, 0, display.width() - 150, tbh, GxEPD_WHITE);
+      display.fillRect(150, 0, display.width() - 150, TextHeight, GxEPD_WHITE);
       display.setCursor(150, 0);
       display.print(wifi->Count);
       display.print(" networks");
 
       // Display the list of networks
-      display.fillRect(0, y, display.width(), display.height() - tbh, GxEPD_WHITE);
+      display.fillRect(0, y, display.width(), DataHeight, GxEPD_WHITE);
       for (int i = 0; i < wifi->Count; i++) {
         display.setCursor(0, y);
         display.print(WiFi.SSID(i));
         display.print(" ");
         display.print(WiFi.RSSI(i));
-        y += tbh + 2;
+        y += TextHeight + 2;
       }
       // Update the display
       display.display(true);
@@ -85,15 +115,15 @@ void loop_fft(bool first) {
     // Draw header
     display.setCursor(0, 0);
     display.print("FFT");
-    display.drawLine(0, tbh + 2, display.width(), tbh + 2, GxEPD_BLACK);
+    display.drawLine(0, HeaderBottom, display.width(), HeaderBottom, GxEPD_BLACK);
     display.display(true);
   }
 
   if (audioFFT->TryLock()) {
     if (audioFFT->NewData) {
       // Display FFT results
-      double fftMax = (double)(display.height() - (tbh + 4));
-      display.fillRect(0, tbh + 4, display.width(), fftMax, GxEPD_WHITE);
+      double fftMax = (double)(DataHeight);
+      display.fillRect(0, TextHeight + 4, display.width(), fftMax, GxEPD_WHITE);
       for (int i = 2; i < SAMPLE_BUFFER_SIZE / 2; i++) {
         int s = min(audioFFT->FFTResults[i], fftMax);
         display.drawLine(i, display.height() - s, i, display.height(), GxEPD_BLACK);
@@ -112,10 +142,10 @@ void loop_ble(bool first) {
     // Draw header
     display.setCursor(0, 0);
     display.print("BLE Scanner");
-    display.drawLine(0, tbh + 2, display.width(), tbh + 2, GxEPD_BLACK);
+    display.drawLine(0, HeaderBottom, display.width(), HeaderBottom, GxEPD_BLACK);
     display.display(true);
   }
-  int y = tbh + 4;
+  int y = TextHeight + 4;
   int x = 0;
   //  display.setCursor(0, y);
   //  display.print("Not implemented");
@@ -123,19 +153,19 @@ void loop_ble(bool first) {
 
   if (ble->TryLock()) {
     if (ble->NewData) {
-      display.fillRect(150, 0, display.width() - 150, tbh, GxEPD_WHITE);
+      display.fillRect(150, 0, display.width() - 150, TextHeight, GxEPD_WHITE);
       display.setCursor(150, 0);
       display.print(ble->FoundDevices.size());
       display.print(" devices");
 
       // Display the list of networks
-      display.fillRect(0, y, display.width(), display.height() - tbh, GxEPD_WHITE);
+      display.fillRect(0, y, display.width(), display.height() - TextHeight, GxEPD_WHITE);
       for (auto s : ble->FoundDevices) {
         display.setCursor(x, y);
         display.print(s);
-        y += tbh + 2;
-        if (y > (display.height() - tbh)) {
-          y = tbh + 4;
+        y += TextHeight + 2;
+        if (y > (display.height() - TextHeight)) {
+          y = TextHeight + 4;
           x += display.width()/2;
         }
       }
@@ -157,17 +187,17 @@ void loop_co2(bool first) {
     // Draw header
     display.setCursor(0, 0);
     display.print("eCO2");
-    display.drawLine(0, tbh + 2, display.width(), tbh + 2, GxEPD_BLACK);
-    display.drawLine(203, tbh + 2, 203, 200, GxEPD_BLACK);
+    display.drawLine(0, HeaderBottom, display.width(), HeaderBottom, GxEPD_BLACK);
+    display.drawLine(203, HeaderBottom, 203, 200, GxEPD_BLACK);
 
     display.display(true);
   }
-  int dispMax = display.height() - (tbh + 4);
+  
   if (co2Sensor->TryLock()) {
     if (co2Sensor->NewData) {
       // Display CO2 results
-      display.fillRect(0, tbh + 4, 200, dispMax, GxEPD_WHITE);
-      display.fillRect(40, 0, 70, tbh, GxEPD_WHITE);
+      display.fillRect(0, TextHeight + 4, 200, DataHeight, GxEPD_WHITE);
+      display.fillRect(40, 0, 70, TextHeight, GxEPD_WHITE);
       display.setCursor(40, 0);
       display.print(co2Sensor->co2[199]);
       display.print("ppm");
@@ -175,7 +205,7 @@ void loop_co2(bool first) {
         int s = co2Sensor->co2[i];
         s -= co2_offset;
         s /= co2_scale;
-        s = min(s, dispMax);
+        s = min(s, DataHeight);
         display.drawLine(i, display.height() - s, i, display.height(), GxEPD_BLACK);
       }
 
