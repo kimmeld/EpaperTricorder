@@ -3,7 +3,7 @@
 #include "WifiScanner.h"
 #include "AudioFFT.h"
 #include "BLEScanner.h"
-#include "CO2.h"
+#include "Environment.h"
 
 #include <GxEPD2_GFX.h>
 #include <GxEPD2_7C.h>
@@ -26,8 +26,8 @@ BLEScanner *ble;
 // FFT
 AudioFFT *audioFFT;
 
-// CO2
-CO2Sensor *co2Sensor;
+// Environmental - eCO2, Temperature, Pressure
+EnvironmentSensor *environmentSensor;
 
 // Display Constants
 const int TextHeight = 7;
@@ -193,16 +193,16 @@ void loop_co2(bool first) {
     display.display(true);
   }
   
-  if (co2Sensor->TryLock()) {
-    if (co2Sensor->NewData) {
+  if (environmentSensor->TryLock()) {
+    if (environmentSensor->NewData) {
       // Display CO2 results
       display.fillRect(0, TextHeight + 4, 200, DataHeight, GxEPD_WHITE);
-      display.fillRect(40, 0, 70, TextHeight, GxEPD_WHITE);
-      display.setCursor(40, 0);
-      display.print(co2Sensor->co2[199]);
+      display.fillRect(80, 0, 70, TextHeight, GxEPD_WHITE);
+      display.setCursor(80, 0);
+      display.print(environmentSensor->co2[199]);
       display.print("ppm");
       for (int i = 0; i < 200; i++) {
-        int s = co2Sensor->co2[i];
+        int s = environmentSensor->co2[i];
         s -= co2_offset;
         s /= co2_scale;
         s = min(s, DataHeight);
@@ -211,9 +211,83 @@ void loop_co2(bool first) {
 
       display.display(true);
       display.hibernate();
-      co2Sensor->NewData = false;
+      environmentSensor->NewData = false;
     }
-    co2Sensor->Unlock();
+    environmentSensor->Unlock();
+  }
+}
+
+const int temp_offset = -20;
+const int temp_scale = 1;
+void loop_temp(bool first) {
+  if (first) {
+    // Draw header
+    display.setCursor(0, 0);
+    display.print("Temperature");
+    display.drawLine(0, HeaderBottom, display.width(), HeaderBottom, GxEPD_BLACK);
+    display.drawLine(203, HeaderBottom, 203, 200, GxEPD_BLACK);
+
+    display.display(true);
+  }
+  
+  if (environmentSensor->TryLock()) {
+    if (environmentSensor->NewData) {
+      // Display temperature results
+      display.fillRect(0, TextHeight + 4, 200, DataHeight, GxEPD_WHITE);
+      display.fillRect(80, 0, 70, TextHeight, GxEPD_WHITE);
+      display.setCursor(80, 0);
+      display.print(environmentSensor->temp[199]);
+      display.print(" C");
+      for (int i = 0; i < 200; i++) {
+        int s = environmentSensor->temp[i];
+        s -= temp_offset;
+        s /= temp_scale;
+        s = min(s, DataHeight);
+        display.drawLine(i, display.height() - s, i, display.height(), GxEPD_BLACK);
+      }
+
+      display.display(true);
+      display.hibernate();
+      environmentSensor->NewData = false;
+    }
+    environmentSensor->Unlock();
+  }
+}
+
+const int pres_offset = 80000;
+const int pres_scale = 1000;
+void loop_pres(bool first) {
+  if (first) {
+    // Draw header
+    display.setCursor(0, 0);
+    display.print("Pressure");
+    display.drawLine(0, HeaderBottom, display.width(), HeaderBottom, GxEPD_BLACK);
+    display.drawLine(203, HeaderBottom, 203, 200, GxEPD_BLACK);
+
+    display.display(true);
+  }
+  
+  if (environmentSensor->TryLock()) {
+    if (environmentSensor->NewData) {
+      // Display CO2 results
+      display.fillRect(0, TextHeight + 4, 200, DataHeight, GxEPD_WHITE);
+      display.fillRect(80, 0, 70, TextHeight, GxEPD_WHITE);
+      display.setCursor(80, 0);
+      display.print(environmentSensor->pres[199]);
+      display.print(" hPa");
+      for (int i = 0; i < 200; i++) {
+        int s = environmentSensor->pres[i];
+        s -= pres_offset;
+        s /= pres_scale;
+        s = min(s, DataHeight);
+        display.drawLine(i, display.height() - s, i, display.height(), GxEPD_BLACK);
+      }
+
+      display.display(true);
+      display.hibernate();
+      environmentSensor->NewData = false;
+    }
+    environmentSensor->Unlock();
   }
 }
 
@@ -239,7 +313,7 @@ void setup()
   wifi = new WifiScanner();
   audioFFT = new AudioFFT();
   //ble = new BLEScanner();
-  co2Sensor = new CO2Sensor();
+  environmentSensor = new EnvironmentSensor();
 
   uiMode = 0;
   uiFirst = true;
@@ -253,7 +327,7 @@ void loop()
   // Go to the next screen
   if (btns->btn1SingleClick) {
     uiMode++;
-    if (uiMode > 2) uiMode = 0;
+    if (uiMode > 4) uiMode = 0;
     ClearDisplay();
     uiFirst = true;
 
@@ -279,6 +353,12 @@ void loop()
       break;
     case 2:
       loop_co2(uiFirst);
+      break;
+    case 3:
+      loop_temp(uiFirst);
+      break;
+    case 4:
+      loop_pres(uiFirst);
       break;
     default:
       break;

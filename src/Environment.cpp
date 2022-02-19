@@ -1,11 +1,11 @@
 /*
-    CO2 sensor
+    Environmental sensor
 
 */
-#include "CO2.h"
+#include "Environment.h"
 #include <Wire.h>
 
-CO2Sensor::CO2Sensor()
+EnvironmentSensor::EnvironmentSensor()
 {
     ccs811 = new CCS811(0x5A);
     if (ccs811->begin())
@@ -17,20 +17,31 @@ CO2Sensor::CO2Sensor()
         Serial.println("Sensor setup FAIL");
     }
 
+    bmp280 = new Adafruit_BMP280();
+    if (bmp280->begin(0x76))
+    {
+        Serial.println("BMP280 ready");
+    }
+    else
+    {
+        Serial.println("BMP280 fail");
+    }
+
     xTaskCreate(
-        CO2Sensor::CO2SensorTask,
-        "CO2Sensor",
+        EnvironmentSensor::CO2SensorTask,
+        "EnvironmentSensor",
         2048,
         (void *)this,
         1,
         &SensorTask);
 }
 
-void CO2Sensor::CO2SensorTask(void *parameter)
+void EnvironmentSensor::CO2SensorTask(void *parameter)
 {
-    CO2Sensor *sensor = (CO2Sensor *)parameter;
+    EnvironmentSensor *sensor = (EnvironmentSensor *)parameter;
     for (;;)
     {
+        // CCS811
         if (sensor->ccs811->dataAvailable())
         {
             sensor->ccs811->readAlgorithmResults();
@@ -59,6 +70,25 @@ void CO2Sensor::CO2SensorTask(void *parameter)
         {
             Serial.println("No data");
         }
+
+        // BMP280
+        if (sensor->Lock())
+        {
+            for (int x = 0; x < 199; x++)
+            {
+                sensor->temp[x] = sensor->temp[x + 1];
+                sensor->pres[x] = sensor->pres[x + 1];
+            }
+            sensor->temp[199] = sensor->bmp280->readTemperature();
+            sensor->pres[199] = sensor->bmp280->readPressure();
+            sensor->NewData = true;
+            sensor->Unlock();
+        }
+        Serial.print("BMP280 temp: ");
+        Serial.print(sensor->bmp280->readTemperature());
+        Serial.print(" pressure: ");
+        Serial.print(sensor->bmp280->readPressure());
+        Serial.println();
 
         // Wait a bit before scanning again
         vTaskDelay(1000 / portTICK_PERIOD_MS);

@@ -1,18 +1,22 @@
-#ifndef CO2_H
-#define CO2_H
+#ifndef ENVIRONMENT_H
+#define ENVIRONMENT_H
 
 #include <SparkFunCCS811.h>
+#include <Adafruit_BMP280.h>
 #include <Arduino.h>
 #include "SensorBase.h"
 
 
-class CO2Sensor: public SensorBase
+class EnvironmentSensor: public SensorBase
 {
   public:
-    CO2Sensor();
+    EnvironmentSensor();
     CCS811 *ccs811;
+    Adafruit_BMP280 *bmp280;
 
     int16_t co2[200] = {-1};
+    float temp[200] = {0};
+    float pres[200] = {0};
     //int16_t tvoc[100] = {-1};
 
     static void CO2SensorTask(void * param);
