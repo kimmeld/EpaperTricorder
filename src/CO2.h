@@ -10,7 +10,7 @@ class CO2Sensor: public SensorBase
 {
   public:
     CO2Sensor();
-    CCS811 *sensor;
+    CCS811 *ccs811;
 
     int16_t co2[200] = {-1};
     //int16_t tvoc[100] = {-1};
