@@ -217,8 +217,9 @@ void loop_co2(bool first) {
   }
 }
 
-const int temp_offset = -20;
+const int temp_offset = 0;
 const int temp_scale = 1;
+const int vCenter = DataHeight / 2 + DataStart;
 void loop_temp(bool first) {
   if (first) {
     // Draw header
@@ -242,8 +243,8 @@ void loop_temp(bool first) {
         int s = environmentSensor->temp[i];
         s -= temp_offset;
         s /= temp_scale;
-        s = min(s, DataHeight);
-        display.drawLine(i, display.height() - s, i, display.height(), GxEPD_BLACK);
+        s = max(min(s, DataHeight/2), -DataHeight/2);
+        display.drawLine(i, vCenter, i, vCenter - s, GxEPD_BLACK);
       }
 
       display.display(true);
