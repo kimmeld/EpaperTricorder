@@ -22,9 +22,15 @@ This sensor scans for BLE devices and displays what it found.
 
 NOTE:  This has been removed.  The BLE stack uses way too much RAM and the results are of questionable value.
 
-## eCO2
+## Environmental Sensors
 
-This uses a CCS811 to calculate CO2 levels.  This sensor is not disabled when not being displayed, instead it keeps collecting history.  You can switch to this sensor and it will show the last 200s of history.
+There are three environmental sensors:
+
+* eCO2 - provided by a CCS811
+* Temperature - provided by a BMP280
+* Air Pressure - provided by a BMP280
+
+The environmental sensors are always on, switching to one of these sensors shows the last 200s of history along with the current state of all environmental sensors.
 
 # General Program Design
 
