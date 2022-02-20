@@ -12,7 +12,7 @@
 #include <GxEPD2_BW.h>
 #include <GxEPD2.h>
 
-GxEPD2_BW<GxEPD2_270, GxEPD2_270::HEIGHT> display(GxEPD2_270(/*CS=5*/ SS, /*DC=*/ 17, /*RST=*/ 16, /*BUSY=*/ 4));
+GxEPD2_BW<GxEPD2_270, GxEPD2_270::HEIGHT> display(GxEPD2_270(/*CS=5*/ SS, /*DC=*/17, /*RST=*/16, /*BUSY=*/4));
 
 // Buttons for user interaction
 Buttons *btns;
@@ -37,35 +37,36 @@ const int DataHeight = 176 - DataStart;
 
 /*
  * Display Layout
- * 
+ *
  * Height = 176, Width = 264
- * 
+ *
  * |----------------------------------------|
  * | Title area - y -> 0-HeaderBottom       |
  * |----------------------------------------|
  * | Data area  - y -> DataStart-DataHeight |
  * |              x -> 0-264                |
  * |                                        |
- * ...                                    ...  
+ * ...                                    ...
  * |                                        |
  * ------------------------------------------
- * 
+ *
  * Title area
  * - Has the name of the sensor/display that's running
  * - May also have additional data, like WiFi network count
- * 
+ *
  * Data area
  * - Entirely up to the sensor/display that's running
  * - Could be a list of stuff - e.g., WiFi networks
  * - Could be a current-state graph - e.g., Audio spectrum
  * - Could be a historical-state graph - e.g., temperature, CO2, etc
- */ 
+ */
 
 // UI Globals
-int uiMode = 0;         // which screen are we on
-bool uiFirst = true;    // Is this the first time through this screen's loop?
+int uiMode = 0;      // which screen are we on
+bool uiFirst = true; // Is this the first time through this screen's loop?
 
-void ClearDisplay() {
+void ClearDisplay()
+{
   display.fillRect(0, 0, display.width(), display.height(), GxEPD_WHITE);
   display.display(false);
 
@@ -74,8 +75,10 @@ void ClearDisplay() {
 }
 
 // UI Code for Wifi Scanner
-void loop_wifi(bool first) {
-  if (first) {
+void loop_wifi(bool first)
+{
+  if (first)
+  {
     // Draw header
     display.setCursor(0, 0);
     display.print("Wifi Scanner");
@@ -84,8 +87,10 @@ void loop_wifi(bool first) {
   }
 
   int y = TextHeight + 4;
-  if (wifi->TryLock()) {
-    if (wifi->NewData) {
+  if (wifi->TryLock())
+  {
+    if (wifi->NewData)
+    {
       wifi->NewData = false;
       // Display number of networks
       display.fillRect(150, 0, display.width() - 150, TextHeight, GxEPD_WHITE);
@@ -95,7 +100,8 @@ void loop_wifi(bool first) {
 
       // Display the list of networks
       display.fillRect(0, y, display.width(), DataHeight, GxEPD_WHITE);
-      for (int i = 0; i < wifi->Count; i++) {
+      for (int i = 0; i < wifi->Count; i++)
+      {
         display.setCursor(0, y);
         display.print(WiFi.SSID(i));
         display.print(" ");
@@ -110,8 +116,10 @@ void loop_wifi(bool first) {
   }
 }
 
-void loop_fft(bool first) {
-  if (first) {
+void loop_fft(bool first)
+{
+  if (first)
+  {
     // Draw header
     display.setCursor(0, 0);
     display.print("FFT");
@@ -119,12 +127,15 @@ void loop_fft(bool first) {
     display.display(true);
   }
 
-  if (audioFFT->TryLock()) {
-    if (audioFFT->NewData) {
+  if (audioFFT->TryLock())
+  {
+    if (audioFFT->NewData)
+    {
       // Display FFT results
       double fftMax = (double)(DataHeight);
       display.fillRect(0, TextHeight + 4, display.width(), fftMax, GxEPD_WHITE);
-      for (int i = 2; i < SAMPLE_BUFFER_SIZE / 2; i++) {
+      for (int i = 2; i < SAMPLE_BUFFER_SIZE / 2; i++)
+      {
         int s = min(audioFFT->FFTResults[i], fftMax);
         display.drawLine(i, display.height() - s, i, display.height(), GxEPD_BLACK);
       }
@@ -136,9 +147,10 @@ void loop_fft(bool first) {
   }
 }
 
-
-void loop_ble(bool first) {
-  if (first) {
+void loop_ble(bool first)
+{
+  if (first)
+  {
     // Draw header
     display.setCursor(0, 0);
     display.print("BLE Scanner");
@@ -151,8 +163,10 @@ void loop_ble(bool first) {
   //  display.print("Not implemented");
   //  display.display(true);
 
-  if (ble->TryLock()) {
-    if (ble->NewData) {
+  if (ble->TryLock())
+  {
+    if (ble->NewData)
+    {
       display.fillRect(150, 0, display.width() - 150, TextHeight, GxEPD_WHITE);
       display.setCursor(150, 0);
       display.print(ble->FoundDevices.size());
@@ -160,13 +174,15 @@ void loop_ble(bool first) {
 
       // Display the list of networks
       display.fillRect(0, y, display.width(), display.height() - TextHeight, GxEPD_WHITE);
-      for (auto s : ble->FoundDevices) {
+      for (auto s : ble->FoundDevices)
+      {
         display.setCursor(x, y);
         display.print(s);
         y += TextHeight + 2;
-        if (y > (display.height() - TextHeight)) {
+        if (y > (display.height() - TextHeight))
+        {
           y = TextHeight + 4;
-          x += display.width()/2;
+          x += display.width() / 2;
         }
       }
       // Update the display
@@ -177,31 +193,66 @@ void loop_ble(bool first) {
     }
     ble->Unlock();
   }
+}
 
+void display_environment_sensors(bool first)
+{
+  // This displays the four environmental sensors along the right-hand column
+  if (first)
+  {
+    display.setCursor(204, DataStart);
+    display.print("eCO2");
+
+    display.setCursor(204, DataStart + (TextHeight + 2) * 3);
+    display.print("Temp");
+
+    display.setCursor(204, DataStart + (TextHeight + 2) * 6);
+    display.print("Pres");
+  }
+
+  display.fillRect(204, DataStart + (TextHeight + 2) * 1, 60, TextHeight, GxEPD_WHITE);
+  display.setCursor(204, DataStart + (TextHeight + 2) * 1);
+  display.print(environmentSensor->co2[199]);
+  display.print("ppm");
+
+  display.fillRect(204, DataStart + (TextHeight + 2) * 4, 60, TextHeight, GxEPD_WHITE);
+  display.setCursor(204, DataStart + (TextHeight + 2) * 4);
+  display.print(environmentSensor->temp[199]);
+  display.print("C");
+
+  display.fillRect(204, DataStart + (TextHeight + 2) * 7, 60, TextHeight, GxEPD_WHITE);
+  display.setCursor(204, DataStart + (TextHeight + 2) * 7);
+  display.print(environmentSensor->pres[199]);
+  display.print("pa");
 }
 
 const int co2_offset = 380;
 const int co2_scale = 10;
-void loop_co2(bool first) {
-  if (first) {
+void loop_co2(bool first)
+{
+  display_environment_sensors(first);
+  if (first)
+  {
     // Draw header
     display.setCursor(0, 0);
     display.print("eCO2");
     display.drawLine(0, HeaderBottom, display.width(), HeaderBottom, GxEPD_BLACK);
-    display.drawLine(203, HeaderBottom, 203, 200, GxEPD_BLACK);
-
+    display.drawLine(202, HeaderBottom, 202, 200, GxEPD_BLACK);
     display.display(true);
   }
-  
-  if (environmentSensor->TryLock()) {
-    if (environmentSensor->NewData) {
+
+  if (environmentSensor->TryLock())
+  {
+    if (environmentSensor->NewData)
+    {
       // Display CO2 results
       display.fillRect(0, TextHeight + 4, 200, DataHeight, GxEPD_WHITE);
       display.fillRect(80, 0, 70, TextHeight, GxEPD_WHITE);
       display.setCursor(80, 0);
       display.print(environmentSensor->co2[199]);
       display.print("ppm");
-      for (int i = 0; i < 200; i++) {
+      for (int i = 0; i < 200; i++)
+      {
         int s = environmentSensor->co2[i];
         s -= co2_offset;
         s /= co2_scale;
@@ -220,30 +271,34 @@ void loop_co2(bool first) {
 const int temp_offset = 0;
 const float temp_scale = 0.5;
 const int vCenter = DataHeight / 2 + DataStart;
-void loop_temp(bool first) {
-  if (first) {
+void loop_temp(bool first)
+{
+  display_environment_sensors(first);
+  if (first)
+  {
     // Draw header
     display.setCursor(0, 0);
     display.print("Temperature");
     display.drawLine(0, HeaderBottom, display.width(), HeaderBottom, GxEPD_BLACK);
-    display.drawLine(203, HeaderBottom, 203, 200, GxEPD_BLACK);
-
+    display.drawLine(202, HeaderBottom, 202, 200, GxEPD_BLACK);
     display.display(true);
   }
-  
-  if (environmentSensor->TryLock()) {
-    if (environmentSensor->NewData) {
+  if (environmentSensor->TryLock())
+  {
+    if (environmentSensor->NewData)
+    {
       // Display temperature results
       display.fillRect(0, TextHeight + 4, 200, DataHeight, GxEPD_WHITE);
       display.fillRect(80, 0, 70, TextHeight, GxEPD_WHITE);
       display.setCursor(80, 0);
       display.print(environmentSensor->temp[199]);
       display.print(" C");
-      for (int i = 0; i < 200; i++) {
+      for (int i = 0; i < 200; i++)
+      {
         float s = environmentSensor->temp[i];
         s -= temp_offset;
         s /= temp_scale;
-        s = max(min((int)s, DataHeight/2), -DataHeight/2);
+        s = max(min((int)s, DataHeight / 2), -DataHeight / 2);
         display.drawLine(i, vCenter, i, vCenter - s, GxEPD_BLACK);
       }
 
@@ -257,26 +312,31 @@ void loop_temp(bool first) {
 
 const int pres_offset = 80000;
 const int pres_scale = 1000;
-void loop_pres(bool first) {
-  if (first) {
+void loop_pres(bool first)
+{
+  display_environment_sensors(first);
+  if (first)
+  {
     // Draw header
     display.setCursor(0, 0);
     display.print("Pressure");
     display.drawLine(0, HeaderBottom, display.width(), HeaderBottom, GxEPD_BLACK);
-    display.drawLine(203, HeaderBottom, 203, 200, GxEPD_BLACK);
-
+    display.drawLine(202, HeaderBottom, 202, 200, GxEPD_BLACK);
     display.display(true);
   }
-  
-  if (environmentSensor->TryLock()) {
-    if (environmentSensor->NewData) {
+
+  if (environmentSensor->TryLock())
+  {
+    if (environmentSensor->NewData)
+    {
       // Display CO2 results
       display.fillRect(0, TextHeight + 4, 200, DataHeight, GxEPD_WHITE);
       display.fillRect(80, 0, 70, TextHeight, GxEPD_WHITE);
       display.setCursor(80, 0);
       display.print(environmentSensor->pres[199]);
-      display.print(" hPa");
-      for (int i = 0; i < 200; i++) {
+      display.print(" Pa");
+      for (int i = 0; i < 200; i++)
+      {
         int s = environmentSensor->pres[i];
         s -= pres_offset;
         s /= pres_scale;
@@ -307,36 +367,35 @@ void setup()
   ClearDisplay();
   display.hibernate();
 
-
-
   // Create the various tasks we require
   btns = new Buttons();
   wifi = new WifiScanner();
   audioFFT = new AudioFFT();
-  //ble = new BLEScanner();
+  // ble = new BLEScanner();
   environmentSensor = new EnvironmentSensor();
 
   uiMode = 0;
   uiFirst = true;
 }
 
-
-
 // UI Loop
 void loop()
 {
   // Go to the next screen
-  if (btns->btn1SingleClick) {
+  if (btns->btn1SingleClick)
+  {
     uiMode++;
-    if (uiMode > 4) uiMode = 0;
+    if (uiMode > 4)
+      uiMode = 0;
     ClearDisplay();
     uiFirst = true;
 
     wifi->Enable = false;
-    //ble->Enable = false;
+    // ble->Enable = false;
   }
 
-  if (btns->btn2SingleClick) {
+  if (btns->btn2SingleClick)
+  {
     Serial.println(ESP.getFreeHeap());
   }
 
@@ -344,25 +403,26 @@ void loop()
   btns->Reset();
 
   // Dispatch to the appropriate UI loop
-  switch (uiMode) {
-    case 0:
-      wifi->Enable = true;
-      loop_wifi(uiFirst);
-      break;
-    case 1:
-      loop_fft(uiFirst);
-      break;
-    case 2:
-      loop_co2(uiFirst);
-      break;
-    case 3:
-      loop_temp(uiFirst);
-      break;
-    case 4:
-      loop_pres(uiFirst);
-      break;
-    default:
-      break;
+  switch (uiMode)
+  {
+  case 0:
+    wifi->Enable = true;
+    loop_wifi(uiFirst);
+    break;
+  case 1:
+    loop_fft(uiFirst);
+    break;
+  case 2:
+    loop_co2(uiFirst);
+    break;
+  case 3:
+    loop_temp(uiFirst);
+    break;
+  case 4:
+    loop_pres(uiFirst);
+    break;
+  default:
+    break;
   }
   uiFirst = false;
 }
