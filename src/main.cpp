@@ -218,7 +218,7 @@ void loop_co2(bool first) {
 }
 
 const int temp_offset = 0;
-const int temp_scale = 1;
+const float temp_scale = 0.5;
 const int vCenter = DataHeight / 2 + DataStart;
 void loop_temp(bool first) {
   if (first) {
@@ -240,10 +240,10 @@ void loop_temp(bool first) {
       display.print(environmentSensor->temp[199]);
       display.print(" C");
       for (int i = 0; i < 200; i++) {
-        int s = environmentSensor->temp[i];
+        float s = environmentSensor->temp[i];
         s -= temp_offset;
         s /= temp_scale;
-        s = max(min(s, DataHeight/2), -DataHeight/2);
+        s = max(min((int)s, DataHeight/2), -DataHeight/2);
         display.drawLine(i, vCenter, i, vCenter - s, GxEPD_BLACK);
       }
 
