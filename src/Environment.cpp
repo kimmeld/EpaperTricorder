@@ -44,7 +44,9 @@ void EnvironmentSensor::CO2SensorTask(void *parameter)
         // CCS811
         if (sensor->ccs811->dataAvailable())
         {
+            sensor->sample_count++;
             sensor->ccs811->readAlgorithmResults();
+            sensor->ccs811baseline = sensor->ccs811->getBaseline();
 
             Serial.print("CO2: ");
             Serial.print(sensor->ccs811->getCO2());

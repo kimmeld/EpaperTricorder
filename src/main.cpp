@@ -208,6 +208,12 @@ void display_environment_sensors(bool first)
 
     display.setCursor(204, DataStart + (TextHeight + 2) * 6);
     display.print("Pres");
+
+    display.setCursor(204, DataStart + (TextHeight + 2) * 9);
+    display.print("Samples");
+
+    display.setCursor(204, DataStart + (TextHeight + 2) * 12);
+    display.print("Baseline");
   }
 
   display.fillRect(204, DataStart + (TextHeight + 2) * 1, 60, TextHeight, GxEPD_WHITE);
@@ -224,6 +230,16 @@ void display_environment_sensors(bool first)
   display.setCursor(204, DataStart + (TextHeight + 2) * 7);
   display.print(environmentSensor->pres[199]);
   display.print("pa");
+
+  display.fillRect(204, DataStart + (TextHeight + 2) * 10, 60, TextHeight, GxEPD_WHITE);
+  display.setCursor(204, DataStart + (TextHeight + 2) * 10);
+  display.print(environmentSensor->sample_count);
+
+  display.fillRect(204, DataStart + (TextHeight + 2) * 13, 60, (TextHeight + 2) * 2, GxEPD_WHITE);
+  display.setCursor(204, DataStart + (TextHeight + 2) * 13);
+  display.print(environmentSensor->ccs811baseline);
+  display.setCursor(204, DataStart + (TextHeight + 2) * 14);
+  display.printf("0x%04X", environmentSensor->ccs811baseline);
 }
 
 const int co2_offset = 380;
@@ -235,7 +251,7 @@ void loop_co2(bool first)
   {
     // Draw header
     display.setCursor(0, 0);
-    display.print("eCO2");
+    display.print("Environment - eCO2");
     display.drawLine(0, HeaderBottom, display.width(), HeaderBottom, GxEPD_BLACK);
     display.drawLine(202, HeaderBottom, 202, 200, GxEPD_BLACK);
     display.display(true);
@@ -247,10 +263,6 @@ void loop_co2(bool first)
     {
       // Display CO2 results
       display.fillRect(0, TextHeight + 4, 200, DataHeight, GxEPD_WHITE);
-      display.fillRect(80, 0, 70, TextHeight, GxEPD_WHITE);
-      display.setCursor(80, 0);
-      display.print(environmentSensor->co2[199]);
-      display.print("ppm");
       for (int i = 0; i < 200; i++)
       {
         int s = environmentSensor->co2[i];
@@ -278,7 +290,7 @@ void loop_temp(bool first)
   {
     // Draw header
     display.setCursor(0, 0);
-    display.print("Temperature");
+    display.print("Environment - Temperature");
     display.drawLine(0, HeaderBottom, display.width(), HeaderBottom, GxEPD_BLACK);
     display.drawLine(202, HeaderBottom, 202, 200, GxEPD_BLACK);
     display.display(true);
@@ -289,10 +301,6 @@ void loop_temp(bool first)
     {
       // Display temperature results
       display.fillRect(0, TextHeight + 4, 200, DataHeight, GxEPD_WHITE);
-      display.fillRect(80, 0, 70, TextHeight, GxEPD_WHITE);
-      display.setCursor(80, 0);
-      display.print(environmentSensor->temp[199]);
-      display.print(" C");
       for (int i = 0; i < 200; i++)
       {
         float s = environmentSensor->temp[i];
@@ -319,7 +327,7 @@ void loop_pres(bool first)
   {
     // Draw header
     display.setCursor(0, 0);
-    display.print("Pressure");
+    display.print("Environment - Pressure");
     display.drawLine(0, HeaderBottom, display.width(), HeaderBottom, GxEPD_BLACK);
     display.drawLine(202, HeaderBottom, 202, 200, GxEPD_BLACK);
     display.display(true);
@@ -331,10 +339,6 @@ void loop_pres(bool first)
     {
       // Display CO2 results
       display.fillRect(0, TextHeight + 4, 200, DataHeight, GxEPD_WHITE);
-      display.fillRect(80, 0, 70, TextHeight, GxEPD_WHITE);
-      display.setCursor(80, 0);
-      display.print(environmentSensor->pres[199]);
-      display.print(" Pa");
       for (int i = 0; i < 200; i++)
       {
         int s = environmentSensor->pres[i];
