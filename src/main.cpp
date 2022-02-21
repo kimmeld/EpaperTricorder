@@ -74,6 +74,77 @@ void ClearDisplay()
   display.setTextColor(GxEPD_BLACK);
 }
 
+// UI Code for Logging Status
+void loop_logging(bool first)
+{
+  // On the logging screen, button 2 toggles logging on and off
+  if (btns->btn2SingleClick)
+  {
+    first = true;  // Force a display redraw
+    btns->Reset();
+    if (logger->active)
+    {
+      // stop logging
+      logger->end();
+    }
+    else
+    {
+      // start logging
+      logger->begin();
+    }
+  }
+
+  if (first)
+  {
+    // Draw header
+    display.setCursor(0, 0);
+    display.print("Logging Status");
+    display.drawLine(0, HeaderBottom, display.width(), HeaderBottom, GxEPD_BLACK);
+    //display.display(true);
+
+    display.fillRect(150, 0, display.width() - 150, TextHeight, GxEPD_WHITE);
+    display.setCursor(150, 0);
+    if (logger->active)
+    {
+      display.print("ACTIVE");
+    }
+    else
+    {
+      display.print("inactive");
+    }
+
+    display.fillRect(0, DataStart, display.width(), DataHeight, GxEPD_WHITE);
+
+    display.setCursor(0, DataStart);
+    display.print("SD Card Type: ");
+    switch (logger->cardType)
+    {
+    case CARD_MMC:
+      display.println("MMC");
+      break;
+    case CARD_SD:
+      display.println("SD");
+      break;
+    case CARD_SDHC:
+      display.println("SDHC");
+      break;
+    case CARD_NONE:
+      display.println("No card");
+      break;
+    default:
+      display.println("Unknown");
+      break;
+    }
+
+    display.print("Card size: ");
+    display.print(logger->cardSize);
+    display.println(" bytes");
+
+    display.display(true);
+    display.hibernate();
+  }
+}
+
 // UI Code for Wifi Scanner
 void loop_wifi(bool first)
 {
@@ -345,8 +416,9 @@ void loop()
   // Go to the next screen
   if (btns->btn1SingleClick)
   {
+    btns->Reset();
     uiMode++;
-    if (uiMode > 4)
+    if (uiMode > 5)
       uiMode = 0;
     ClearDisplay();
     uiFirst = true;
@@ -356,31 +428,25 @@ void loop()
     // ble->Enable = false;
   }
 
-  if (btns->btn2SingleClick)
-  {
-    Serial.println(ESP.getFreeHeap());
-  }
-
-  // We've read the buttons
-  btns->Reset();
-
   // Dispatch to the appropriate UI loop
   switch (uiMode)
   {
   case 0:
-    wifi->Enable = true;
-    loop_wifi(uiFirst);
+    loop_logging(uiFirst);
     break;
   case 1:
-    loop_fft(uiFirst);
+    loop_wifi(uiFirst);
     break;
   case 2:
-    loop_co2(uiFirst);
+    loop_fft(uiFirst);
     break;
   case 3:
-    loop_temp(uiFirst);
+    loop_co2(uiFirst);
     break;
   case 4:
+    loop_temp(uiFirst);
+    break;
+  case 5:
     loop_pres(uiFirst);
     break;
   default:

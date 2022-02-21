@@ -2,58 +2,64 @@
 
 SDLogger::SDLogger() : SDSPI(HSPI)
 {
-}
+    active = false;
+    SDSPI.begin(14, 2, 15, 13);  // Pinout comes from schematic diagram, why did they put MISO on IO2 instead of IO12?
 
-void SDLogger::begin()
-{
-    // Initialize SD card
-    // Pinout comes from schematic diagram, why did they put MISO on IO2 instead of IO12?
-    SDSPI.begin(14, 2, 15, 13);
-    Serial.println("Card Mount start");
-    if (!SD.begin(13, SDSPI))
-    {
-        Serial.println("Card Mount Failed");
-        return;
-    }
-    Serial.println("Card Mount done");
-    uint8_t cardType = SD.cardType();
-
-    if (cardType == CARD_NONE)
-    {
-        Serial.println("No SD card attached");
-        return;
-    }
-
-    Serial.print("SD Card Type: ");
-    if (cardType == CARD_MMC)
-    {
-        Serial.println("MMC");
-    }
-    else if (cardType == CARD_SD)
-    {
-        Serial.println("SDSC");
-    }
-    else if (cardType == CARD_SDHC)
-    {
-        Serial.println("SDHC");
-    }
-    else
-    {
-        Serial.println("UNKNOWN");
-    }
-
-    logFile = SD.open("/log.txt", "a");
-    logFile.println("=== BEGIN ===");
-
-    // If all of the above succeeded, create the logger task
-    // Otherwise, we don't need to do any logging (obviously)
     xTaskCreate(
         SDLogger::SDLoggerTask,
         "SDLogger",
-        8192,
+        2048,
         (void *)this,
         1,
         &SensorTask);
+}
+
+// Activate logging
+void SDLogger::begin()
+{  
+    if (Lock())
+    {
+        bool canActivate = true;
+        Serial.println("Card Mount start");
+        if (!SD.begin(13, SDSPI))
+        {
+            Serial.println("Card Mount Failed");
+            canActivate = false;
+        }
+        Serial.println("Card Mount done");
+        cardType = SD.cardType();
+
+        if (cardType == CARD_NONE)
+        {
+            Serial.println("No SD card attached");
+            canActivate = false;
+        }
+
+        if (canActivate)
+        {
+            cardSize = SD.cardSize();
+            logFile = SD.open("/log.txt", "a");
+            logFile.println("=== BEGIN ===");
+            active = true;
+        }
+        Unlock();
+    }
+}
+
+// Stop logging to the SD card
+void SDLogger::end()
+{
+    if (Lock())
+    {
+        active = false;
+        logFile.println("=== END ===");
+        logFile.close();
+        SD.end();
+
+        cardType = CARD_NONE;
+        cardSize = 0;
+        Unlock();
+    }
 }
 
 void SDLogger::AddSensor(SensorBase *sens)
@@ -66,17 +72,26 @@ void SDLogger::SDLoggerTask(void *param)
     SDLogger *logger = (SDLogger *)param;
     for (;;)
     {
-        logger->logFile.print("Tick:");
-        logger->logFile.println(millis());
-
-        // Tell each configured sensor to go log itself
-        for (SensorBase *s : logger->sensors)
+        if (logger->active)
         {
-            s->Log(&logger->logFile);
+            if (logger->TryLock())
+            {
+                // For each sensor with new data, log the timestamp and its data
+                for (SensorBase *s : logger->sensors)
+                {
+                    if (s->NewLogData)
+                    {
+                        logger->logFile.print("Tick:");
+                        logger->logFile.println(millis());
+                        s->Log(&logger->logFile);
+                    }
+                }
+
+                logger->logFile.flush();
+                logger->Unlock();
+            }
         }
 
-        logger->logFile.flush();
-        Serial.println("Log");
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        vTaskDelay(250 / portTICK_PERIOD_MS);
     }
 }

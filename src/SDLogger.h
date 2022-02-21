@@ -12,11 +12,16 @@ class SDLogger : public SensorBase
 public:
     SDLogger();
     void begin();
+    void end();
 
     void AddSensor(SensorBase *sens);
 
     static void SDLoggerTask(void *param);
 
+    bool active;
+
+    uint8_t cardType;
+    uint64_t cardSize;
 private:
     SPIClass SDSPI;
     SDFile logFile;
