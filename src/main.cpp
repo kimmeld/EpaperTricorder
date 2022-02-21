@@ -2,7 +2,6 @@
 #include "buttons.h"
 #include "WifiScanner.h"
 #include "AudioFFT.h"
-#include "BLEScanner.h"
 #include "Environment.h"
 #include "SDLogger.h"
 
@@ -20,9 +19,6 @@ Buttons *btns;
 
 // Wifi Scanner
 WifiScanner *wifi;
-
-// BLE Scanner
-BLEScanner *ble;
 
 // FFT
 AudioFFT *audioFFT;
@@ -148,54 +144,6 @@ void loop_fft(bool first)
       audioFFT->NewData = false;
     }
     audioFFT->Unlock();
-  }
-}
-
-void loop_ble(bool first)
-{
-  if (first)
-  {
-    // Draw header
-    display.setCursor(0, 0);
-    display.print("BLE Scanner");
-    display.drawLine(0, HeaderBottom, display.width(), HeaderBottom, GxEPD_BLACK);
-    display.display(true);
-  }
-  int y = TextHeight + 4;
-  int x = 0;
-  //  display.setCursor(0, y);
-  //  display.print("Not implemented");
-  //  display.display(true);
-
-  if (ble->TryLock())
-  {
-    if (ble->NewData)
-    {
-      display.fillRect(150, 0, display.width() - 150, TextHeight, GxEPD_WHITE);
-      display.setCursor(150, 0);
-      display.print(ble->FoundDevices.size());
-      display.print(" devices");
-
-      // Display the list of networks
-      display.fillRect(0, y, display.width(), display.height() - TextHeight, GxEPD_WHITE);
-      for (auto s : ble->FoundDevices)
-      {
-        display.setCursor(x, y);
-        display.print(s);
-        y += TextHeight + 2;
-        if (y > (display.height() - TextHeight))
-        {
-          y = TextHeight + 4;
-          x += display.width() / 2;
-        }
-      }
-      // Update the display
-      display.display(true);
-      display.hibernate();
-
-      ble->NewData = false;
-    }
-    ble->Unlock();
   }
 }
 
