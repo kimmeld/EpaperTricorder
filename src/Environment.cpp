@@ -36,6 +36,30 @@ EnvironmentSensor::EnvironmentSensor()
         &SensorTask);
 }
 
+void EnvironmentSensor::Log(SDFile *log)
+{
+    if (!NewLogData) {
+        return;
+    }
+    if (Lock())
+    {
+        log->print("Env: ");
+        log->print("Sample:");
+        log->print(sample_count);
+        log->print(" CO2:");
+        log->print(co2[199]);
+        log->print("ppm Temp:");
+        log->print(temp[199]);
+        log->print("C Pres:");
+        log->print(pres[199]);
+        log->print("pa CCS811Baseline:");
+        log->print(ccs811baseline);
+        log->println();
+        NewLogData = false;
+        Unlock();
+    }
+}
+
 void EnvironmentSensor::CO2SensorTask(void *parameter)
 {
     EnvironmentSensor *sensor = (EnvironmentSensor *)parameter;
@@ -65,6 +89,7 @@ void EnvironmentSensor::CO2SensorTask(void *parameter)
                 sensor->co2[199] = sensor->ccs811->getCO2();
                 // sensor->tvoc[99] = sensor->sensor->getTVOC();
                 sensor->NewData = true;
+                sensor->NewLogData = true;
                 sensor->Unlock();
             }
         }

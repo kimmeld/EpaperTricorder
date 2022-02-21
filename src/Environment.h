@@ -24,6 +24,8 @@ class EnvironmentSensor: public SensorBase
     //int16_t tvoc[100] = {-1};
 
     static void CO2SensorTask(void * param);
+
+    virtual void Log(SDFile* log);
 };
 
 

@@ -7,6 +7,7 @@
  
 SensorBase::SensorBase() {
   NewData = false;
+  NewLogData = false;
   Enable = false;
   sem = xSemaphoreCreateMutex();
 }
@@ -21,4 +22,8 @@ bool SensorBase::Lock() {
 
 void SensorBase::Unlock() {
   xSemaphoreGive(sem);
+}
+
+void SensorBase::Log(SDFile *log) {
+  return;
 }

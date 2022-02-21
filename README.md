@@ -43,3 +43,9 @@ The "main" Arduino task (which runs `loop()`) is used exclusively for runing the
 # User Interface
 
 The user interface consists of the three buttons present on the LilyGo T5.  The button closest to the SD card slot switches sensors.  The other buttons are currently unused, except for the second button which is temporarily used for debugging.
+
+# Logging
+
+If an appropriately-formatted SD card is inserted when powered up or reset the program will create a log file on the card and log environmental data every 1s or so.  Tick counts will be logged as well so that the data can be correlated back to wall time.  Note that the ESP32 doesn't have a real-time clock, or even decent timekeeping abilities, so we can't log reasonable timestamps.
+
+Perhaps an external RTC could be attached in the future.

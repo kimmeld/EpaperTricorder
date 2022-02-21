@@ -4,6 +4,7 @@
 #include "AudioFFT.h"
 #include "BLEScanner.h"
 #include "Environment.h"
+#include "SDLogger.h"
 
 #include <GxEPD2_GFX.h>
 #include <GxEPD2_7C.h>
@@ -28,6 +29,9 @@ AudioFFT *audioFFT;
 
 // Environmental - eCO2, Temperature, Pressure
 EnvironmentSensor *environmentSensor;
+
+// SD Logger
+SDLogger *logger;
 
 // Display Constants
 const int TextHeight = 7;
@@ -377,6 +381,10 @@ void setup()
   audioFFT = new AudioFFT();
   // ble = new BLEScanner();
   environmentSensor = new EnvironmentSensor();
+
+  logger = new SDLogger();
+  logger->AddSensor(environmentSensor);
+  logger->begin();
 
   uiMode = 0;
   uiFirst = true;
