@@ -75,7 +75,7 @@ void ClearDisplay()
 }
 
 // UI Code for Logging Status
-void loop_logging(bool first)
+void loop_status(bool first)
 {
   // On the logging screen, button 2 toggles logging on and off
   if (btns->btn2SingleClick)
@@ -98,24 +98,22 @@ void loop_logging(bool first)
   {
     // Draw header
     display.setCursor(0, 0);
-    display.print("Logging Status");
+    display.print("Status");
     display.drawLine(0, HeaderBottom, display.width(), HeaderBottom, GxEPD_BLACK);
     //display.display(true);
 
-    display.fillRect(150, 0, display.width() - 150, TextHeight, GxEPD_WHITE);
-    display.setCursor(150, 0);
+    display.fillRect(0, DataStart, display.width(), DataHeight, GxEPD_WHITE);
+    display.setCursor(0, DataStart);
+    display.print("Logging status: ");
     if (logger->active)
     {
-      display.print("ACTIVE");
+      display.println("ACTIVE");
     }
     else
     {
-      display.print("inactive");
+      display.println("inactive");
     }
 
-    display.fillRect(0, DataStart, display.width(), DataHeight, GxEPD_WHITE);
-
-    display.setCursor(0, DataStart);
     display.print("SD Card Type: ");
     switch (logger->cardType)
     {
@@ -432,7 +430,7 @@ void loop()
   switch (uiMode)
   {
   case 0:
-    loop_logging(uiFirst);
+    loop_status(uiFirst);
     break;
   case 1:
     loop_wifi(uiFirst);
