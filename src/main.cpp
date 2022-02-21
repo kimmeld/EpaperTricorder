@@ -384,6 +384,7 @@ void setup()
 
   logger = new SDLogger();
   logger->AddSensor(environmentSensor);
+  logger->AddSensor(wifi);
   logger->begin();
 
   uiMode = 0;
@@ -402,7 +403,8 @@ void loop()
     ClearDisplay();
     uiFirst = true;
 
-    wifi->Enable = false;
+    // Now that logging is a thing, we can't disable any of our sensors when they are unused
+    // wifi->Enable = false;
     // ble->Enable = false;
   }
 

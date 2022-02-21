@@ -15,6 +15,7 @@ class WifiScanner : public SensorBase
     WifiScanner();
     int Count;
 
+    virtual void Log(SDFile *log);
 
     static void WifiScannerTask(void * param);
 };
