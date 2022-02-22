@@ -3,6 +3,8 @@
 SDLogger::SDLogger() : SDSPI(HSPI)
 {
     active = false;
+    cardSize = 0;
+    cardUsed = 0;
     SDSPI.begin(14, 2, 15, 13);  // Pinout comes from schematic diagram, why did they put MISO on IO2 instead of IO12?
 
     xTaskCreate(
@@ -88,6 +90,7 @@ void SDLogger::SDLoggerTask(void *param)
                 }
 
                 logger->logFile.flush();
+                logger->cardUsed = SD.usedBytes();
                 logger->Unlock();
             }
         }

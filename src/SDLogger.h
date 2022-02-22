@@ -22,6 +22,7 @@ public:
 
     uint8_t cardType;
     uint64_t cardSize;
+    uint64_t cardUsed;
 private:
     SPIClass SDSPI;
     SDFile logFile;

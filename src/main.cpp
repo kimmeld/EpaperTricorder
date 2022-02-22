@@ -75,12 +75,13 @@ void ClearDisplay()
 }
 
 // UI Code for Logging Status
+uint64_t last_disp;
 void loop_status(bool first)
 {
   // On the logging screen, button 2 toggles logging on and off
   if (btns->btn2SingleClick)
   {
-    first = true;  // Force a display redraw
+    first = true; // Force a display redraw
     btns->Reset();
     if (logger->active)
     {
@@ -94,13 +95,16 @@ void loop_status(bool first)
     }
   }
 
-  if (first)
+  uint64_t now = millis();
+  if (first || now > last_disp + 1000)
   {
+    last_disp = now;
+
     // Draw header
     display.setCursor(0, 0);
     display.print("Status");
     display.drawLine(0, HeaderBottom, display.width(), HeaderBottom, GxEPD_BLACK);
-    //display.display(true);
+    // display.display(true);
 
     display.fillRect(0, DataStart, display.width(), DataHeight, GxEPD_WHITE);
     display.setCursor(0, DataStart);
@@ -136,6 +140,14 @@ void loop_status(bool first)
 
     display.print("Card size: ");
     display.print(logger->cardSize);
+    display.println(" bytes");
+    display.print("Card used: ");
+    display.print(logger->cardUsed);
+    display.println(" bytes");
+
+    display.println();
+    display.print("Free Heap: ");
+    display.print(ESP.getFreeHeap());
     display.println(" bytes");
 
     display.display(true);
