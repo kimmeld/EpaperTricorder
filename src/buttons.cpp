@@ -10,8 +10,7 @@ Buttons::Buttons() {
   btn2 = new PinButton(38);
   btn3 = new PinButton(39);
 
-  btn1SingleClick = false;
-  btn2SingleClick = false;
+  Reset();
 
   xTaskCreate(
     Buttons::ButtonsTask,
@@ -26,6 +25,7 @@ Buttons::Buttons() {
 void Buttons::Reset() {
   btn1SingleClick = false;
   btn2SingleClick = false;
+  btn1LongClick = false;
 }
 
 
@@ -42,6 +42,9 @@ void Buttons::ButtonsTask(void * param) {
     }
     if (btns->btn2->isSingleClick()) {
       btns->btn2SingleClick = true;
+    }
+    if (btns->btn1->isLongClick()) {
+      btns->btn1LongClick = true;
     }
     vTaskDelay(20 / portTICK_PERIOD_MS);
   }

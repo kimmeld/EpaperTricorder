@@ -15,6 +15,7 @@ class Buttons
     PinButton *btn3;
 
     bool btn1SingleClick;
+    bool btn1LongClick;
     bool btn2SingleClick;
 
     Buttons();

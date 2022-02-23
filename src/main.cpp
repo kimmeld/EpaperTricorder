@@ -432,6 +432,15 @@ void loop()
       uiMode = 0;
     ClearDisplay();
     uiFirst = true;
+  }
+
+  // Go to the status screen with a long click
+  if (btns->btn1LongClick)
+  {
+    btns->Reset();
+    uiMode = 0;
+    ClearDisplay();
+    uiFirst = true;
 
     // Now that logging is a thing, we can't disable any of our sensors when they are unused
     // wifi->Enable = false;
