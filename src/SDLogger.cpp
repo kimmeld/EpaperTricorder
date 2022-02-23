@@ -1,16 +1,17 @@
 #include "SDLogger.h"
+#include <ArduinoJson.h>
 
 SDLogger::SDLogger() : SDSPI(HSPI)
 {
     active = false;
     cardSize = 0;
     cardUsed = 0;
-    SDSPI.begin(14, 2, 15, 13);  // Pinout comes from schematic diagram, why did they put MISO on IO2 instead of IO12?
+    SDSPI.begin(14, 2, 15, 13); // Pinout comes from schematic diagram, why did they put MISO on IO2 instead of IO12?
 
     xTaskCreate(
         SDLogger::SDLoggerTask,
         "SDLogger",
-        2048,
+        8192,
         (void *)this,
         1,
         &SensorTask);
@@ -18,7 +19,7 @@ SDLogger::SDLogger() : SDSPI(HSPI)
 
 // Activate logging
 void SDLogger::begin()
-{  
+{
     if (Lock())
     {
         bool canActivate = true;
@@ -40,8 +41,14 @@ void SDLogger::begin()
         if (canActivate)
         {
             cardSize = SD.cardSize();
-            logFile = SD.open("/log.txt", "a");
-            logFile.println("=== BEGIN ===");
+            logFile = SD.open("/log.json", "a");
+            // logFile.println("=== BEGIN ===");
+
+            DynamicJsonDocument logent(128);
+            logent["tick"] = millis();
+            logent["log"] = "BEGIN";
+            serializeJson(logent, logFile);
+            logFile.println();
             active = true;
         }
         Unlock();
@@ -54,12 +61,17 @@ void SDLogger::end()
     if (Lock())
     {
         active = false;
-        logFile.println("=== END ===");
+        DynamicJsonDocument logent(128);
+        logent["tick"] = millis();
+        logent["log"] = "END";
+        serializeJson(logent, logFile);
+        logFile.println();
         logFile.close();
         SD.end();
 
         cardType = CARD_NONE;
         cardSize = 0;
+        cardUsed = 0;
         Unlock();
     }
 }
@@ -83,9 +95,14 @@ void SDLogger::SDLoggerTask(void *param)
                 {
                     if (s->NewLogData)
                     {
-                        logger->logFile.print("Tick:");
-                        logger->logFile.println(millis());
-                        s->Log(&logger->logFile);
+                        DynamicJsonDocument logent(512);
+                        logent["tick"] = millis();
+                        logent["sensor_log"] = s->GetLog();
+                        serializeJson(logent, logger->logFile);
+                        logger->logFile.println();
+                        // logger->logFile.print("Tick:");
+                        // logger->logFile.println(millis());
+                        // s->Log(&logger->logFile);
                     }
                 }
 

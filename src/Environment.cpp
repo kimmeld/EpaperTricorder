@@ -38,7 +38,8 @@ EnvironmentSensor::EnvironmentSensor()
 
 void EnvironmentSensor::Log(SDFile *log)
 {
-    if (!NewLogData) {
+    if (!NewLogData)
+    {
         return;
     }
     if (Lock())
@@ -58,6 +59,28 @@ void EnvironmentSensor::Log(SDFile *log)
         NewLogData = false;
         Unlock();
     }
+}
+
+DynamicJsonDocument EnvironmentSensor::GetLog()
+{
+    DynamicJsonDocument logent(1024);
+    if (Lock())
+    {
+        logent["source"] = "Environment";
+        logent["CO2"] = co2[199];
+        logent["TVOC"] = tvoc[199];
+        logent["Temp"] = temp[199];
+        logent["Pres"] = pres[199];
+        logent["ccs811baseline"] = ccs811baseline;
+        logent["count"] = sample_count;
+        NewLogData = false;
+        Unlock();
+    }
+    else
+    {
+        logent["Error"] = "Could not acquire lock";
+    }
+    return logent;
 }
 
 void EnvironmentSensor::CO2SensorTask(void *parameter)
@@ -84,10 +107,10 @@ void EnvironmentSensor::CO2SensorTask(void *parameter)
                 for (int x = 0; x < 199; x++)
                 {
                     sensor->co2[x] = sensor->co2[x + 1];
-                    // sensor->tvoc[x] = sensor->tvoc[x + 1];
+                    sensor->tvoc[x] = sensor->tvoc[x + 1];
                 }
                 sensor->co2[199] = sensor->ccs811->getCO2();
-                // sensor->tvoc[99] = sensor->sensor->getTVOC();
+                sensor->tvoc[99] = sensor->ccs811->getTVOC();
                 sensor->NewData = true;
                 sensor->NewLogData = true;
                 sensor->Unlock();

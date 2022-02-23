@@ -8,6 +8,7 @@
 
 #include <FreeRTOS.h>
 #include <SD.h>
+#include <ArduinoJson.h>
 
 class SensorBase
 {
@@ -26,6 +27,7 @@ class SensorBase
 
     /* Log relevant data to the log file */
     virtual void Log(SDFile *file);
+    virtual DynamicJsonDocument GetLog();
 
   protected:
     SemaphoreHandle_t sem;    // Semaphore used to protect access to data

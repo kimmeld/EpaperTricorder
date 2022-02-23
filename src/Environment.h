@@ -9,7 +9,7 @@
 
 class EnvironmentSensor: public SensorBase
 {
-  public:
+  public:    
     EnvironmentSensor();
     
     CCS811 *ccs811;
@@ -21,11 +21,12 @@ class EnvironmentSensor: public SensorBase
     float temp[200] = {0};
     float pres[200] = {0};
     uint32_t sample_count = 0;
-    //int16_t tvoc[100] = {-1};
+    int16_t tvoc[200] = {-1};
 
     static void CO2SensorTask(void * param);
 
     virtual void Log(SDFile* log);
+    virtual DynamicJsonDocument GetLog();
 };
 
 

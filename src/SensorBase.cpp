@@ -27,3 +27,9 @@ void SensorBase::Unlock() {
 void SensorBase::Log(SDFile *log) {
   return;
 }
+
+DynamicJsonDocument SensorBase::GetLog() {
+  DynamicJsonDocument logent(128);
+  logent["error"] = "Not implemented";
+  return logent;
+}

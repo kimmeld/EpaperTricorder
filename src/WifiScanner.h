@@ -16,6 +16,7 @@ class WifiScanner : public SensorBase
     int Count;
 
     virtual void Log(SDFile *log);
+    virtual DynamicJsonDocument GetLog();
 
     static void WifiScannerTask(void * param);
 };

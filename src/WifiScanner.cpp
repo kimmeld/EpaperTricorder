@@ -45,6 +45,26 @@ void WifiScanner::Log(SDFile *log)
   }
 }
 
+DynamicJsonDocument WifiScanner::GetLog()
+{
+  DynamicJsonDocument logent(2048);
+  if (Lock())
+  {    
+    logent["source"] = "WifiScanner";
+    logent["Count"] = Count;
+    for (int n = 0; n < Count; n++)
+    {
+      logent["Networks"][n]["SSID"] = WiFi.SSID(n);
+      logent["Networks"][n]["RSSI"] = WiFi.RSSI(n);
+    }
+    NewLogData = false;
+    Unlock();
+  } else {
+    logent["Error"] = "Could not acquire lock";
+  }
+  return logent;
+}
+
 void WifiScanner::WifiScannerTask(void *parameter)
 {
   WifiScanner *scan = (WifiScanner *)parameter;
