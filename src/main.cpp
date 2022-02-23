@@ -118,7 +118,7 @@ void loop_status(bool first)
       display.println("inactive");
     }
 
-    display.print("SD Card Type: ");
+    display.print("  SD Card Type: ");
     switch (logger->cardType)
     {
     case CARD_MMC:
@@ -138,17 +138,23 @@ void loop_status(bool first)
       break;
     }
 
-    display.print("Card size: ");
+    display.print("  Card size: ");
     display.print(logger->cardSize);
     display.println(" bytes");
-    display.print("Card used: ");
+    display.print("  Card used: ");
     display.print(logger->cardUsed);
     display.println(" bytes");
 
     display.println();
-    display.print("Free Heap: ");
+    display.println("ESP Status:");
+    display.print("  Free Heap: ");
     display.print(ESP.getFreeHeap());
     display.println(" bytes");
+    display.print("  Uptime: ");
+    display.print(millis() / 1000);
+    display.println("s");
+
+    display.println();
 
     display.display(true);
     display.hibernate();

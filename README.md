@@ -42,7 +42,27 @@ The "main" Arduino task (which runs `loop()`) is used exclusively for runing the
 
 # User Interface
 
-The user interface consists of the three buttons present on the LilyGo T5.  The button closest to the SD card slot switches sensors.  The other buttons are currently unused, except for the second button which is temporarily used for debugging.
+The user interface consists of the three buttons present on the LilyGo T5.
+
+* Button 1 (closest to the SD card slot):
+  * Short press:  Cycle between pages/sensors
+  * Long press:  Return to status page
+* Button 2:
+  * Short press:
+    * On status page, enable/disable logging.
+    * Otherwise, no action.
+  * Long press:  No action.
+* Button 3:
+  * Short press:  No action.
+  * Long press:  No action.
+
+Displays:
+* System Status
+* Wifi Scanner
+* FFT
+* eCO2
+* Temperature
+* Pressure
 
 # Logging
 
