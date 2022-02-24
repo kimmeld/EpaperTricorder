@@ -144,6 +144,8 @@ void loop_status(bool first)
     display.print("  Card used: ");
     display.print(logger->cardUsed);
     display.println(" bytes");
+    display.print("  File: ");
+    display.println(logger->filename.c_str());
 
     display.println();
     display.println("ESP Status:");

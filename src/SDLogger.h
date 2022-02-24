@@ -6,6 +6,7 @@
 #include <SD.h>
 #include <SPI.h>
 #include <vector>
+#include <string>
 
 class SDLogger : public SensorBase
 {
@@ -23,6 +24,7 @@ public:
     uint8_t cardType;
     uint64_t cardSize;
     uint64_t cardUsed;
+    std::string filename;
 private:
     SPIClass SDSPI;
     SDFile logFile;

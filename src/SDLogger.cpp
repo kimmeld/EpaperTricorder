@@ -1,11 +1,13 @@
 #include "SDLogger.h"
 #include <ArduinoJson.h>
+#include <string>
 
 SDLogger::SDLogger() : SDSPI(HSPI)
 {
     active = false;
     cardSize = 0;
     cardUsed = 0;
+    filename = "N/A";
     SDSPI.begin(14, 2, 15, 13); // Pinout comes from schematic diagram, why did they put MISO on IO2 instead of IO12?
 
     xTaskCreate(
@@ -41,7 +43,18 @@ void SDLogger::begin()
         if (canActivate)
         {
             cardSize = SD.cardSize();
-            logFile = SD.open("/log.json", "a");
+
+            char fname[20];
+            for (int i = 0; i < 1000; i++)
+            {
+                snprintf(fname, sizeof(fname), "/log_%d.json", i);
+                if (!SD.exists(fname))
+                {
+                    break;
+                }
+            }
+            filename = fname;
+            logFile = SD.open(fname, "a");
             // logFile.println("=== BEGIN ===");
 
             DynamicJsonDocument logent(128);
@@ -72,6 +85,7 @@ void SDLogger::end()
         cardType = CARD_NONE;
         cardSize = 0;
         cardUsed = 0;
+        filename = "N/A";
         Unlock();
     }
 }
