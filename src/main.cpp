@@ -102,7 +102,7 @@ void loop_status(bool first)
 
     // Draw header
     display.setCursor(0, 0);
-    display.print("Status");
+    display.print("System Status");
     display.drawLine(0, HeaderBottom, display.width(), HeaderBottom, GxEPD_BLACK);
     // display.display(true);
 
@@ -138,34 +138,18 @@ void loop_status(bool first)
       break;
     }
 
-    display.print("  Card size: ");
-    display.print(logger->cardSize);
-    display.println(" bytes");
-    display.print("  Card used: ");
-    display.print(logger->cardUsed);
-    display.println(" bytes");
-    display.print("  File: ");
-    display.println(logger->filename.c_str());
-    display.print("  Log time: ");
-    uint64_t logtime = logger->GetLogRuntime() / 1000;
-    display.print(logtime / 60);
-    display.print("m ");
-    display.print(logtime % 60);
-    display.println("s");
+    display.printf("  Card size:    %12" PRIu64 " bytes\n", logger->cardSize);
+    display.printf("  Card used:    %12" PRIu64 " bytes\n", logger->cardUsed);
+    display.printf("  File:         %s\n", logger->filename.c_str());
+    uint64_t logtime = logger->GetLogRuntime() / 1000; 
+    display.printf("  Log time:     %" PRIu64 "h " "%" PRIu64 "m " "%" PRIu64 "s\n", logtime/60/60, logtime/60%60, logtime%60);
 
     display.println();
     display.println("ESP Status:");
-    display.print("  Free Heap: ");
-    display.print(ESP.getFreeHeap());
-    display.println(" bytes");
-    display.print("  Uptime: ");
+    display.printf("  Free Heap:    %6d bytes\n", ESP.getFreeHeap());
     uint64_t uptime = millis() / 1000;
-    display.print(uptime / 60);
-    display.print("m ");
-    display.print(uptime % 60);
-    display.println("s");
+    display.printf("  Uptime:       %" PRIu64 "h " "%" PRIu64 "m " "%" PRIu64 "s\n", uptime/60/60, uptime/60%60, uptime%60);
 
-    display.println();
 
     display.display(true);
     display.hibernate();
