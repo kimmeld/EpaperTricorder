@@ -146,6 +146,12 @@ void loop_status(bool first)
     display.println(" bytes");
     display.print("  File: ");
     display.println(logger->filename.c_str());
+    display.print("  Log time: ");
+    uint64_t logtime = logger->GetLogRuntime() / 1000;
+    display.print(logtime / 60);
+    display.print("m ");
+    display.print(logtime % 60);
+    display.println("s");
 
     display.println();
     display.println("ESP Status:");
@@ -153,7 +159,10 @@ void loop_status(bool first)
     display.print(ESP.getFreeHeap());
     display.println(" bytes");
     display.print("  Uptime: ");
-    display.print(millis() / 1000);
+    uint64_t uptime = millis() / 1000;
+    display.print(uptime / 60);
+    display.print("m ");
+    display.print(uptime % 60);
     display.println("s");
 
     display.println();

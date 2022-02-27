@@ -63,9 +63,19 @@ void SDLogger::begin()
             serializeJson(logent, logFile);
             logFile.println();
             active = true;
+            logStartTime = millis();
         }
         Unlock();
     }
+}
+
+uint64_t SDLogger::GetLogRuntime()
+{
+    if (active)
+    {
+        return millis() - logStartTime;
+    }
+    return 0;
 }
 
 // Stop logging to the SD card
@@ -86,6 +96,7 @@ void SDLogger::end()
         cardSize = 0;
         cardUsed = 0;
         filename = "N/A";
+        logStartTime = -1;
         Unlock();
     }
 }

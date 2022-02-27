@@ -25,10 +25,13 @@ public:
     uint64_t cardSize;
     uint64_t cardUsed;
     std::string filename;
+
+    uint64_t GetLogRuntime();
 private:
     SPIClass SDSPI;
     SDFile logFile;
     std::vector<SensorBase*> sensors;
+    uint64_t logStartTime;
 };
 
 #endif
